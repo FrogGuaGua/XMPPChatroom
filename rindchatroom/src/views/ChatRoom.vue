@@ -15,28 +15,14 @@
 <script setup>
 import UserList from "@/components/UserList.vue";
 import UserMessage from "@/components/UserMessage.vue"
-import { ref } from "vue";
+import {  ref } from "vue";
+// const myXMPP = inject('myXMPP')
 const pageHeight = ref(document.documentElement.clientHeight)
 const userListHeight = ()=>{
   return "height: "+ pageHeight.value*0.85+"px"
 }
-// Define the user list
-const users = ([
-  { nickName: 'User1', lastMessage: 'Hello' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User1', lastMessage: 'Hello' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-  { nickName: 'User2', lastMessage: 'Hi there' },
-]);
+const users = []
+// const users = reactive(myXMPP.xmlToObject(myXMPP.myxml.presence))
 </script>
 
 <style>

@@ -21,13 +21,16 @@
 
 <script setup>
 import { ref } from 'vue';
+import { inject } from 'vue';
+
+const myInfomation = inject('myInfomation');
 
 
 const nickName = ref("")
 const userInput = ref("")
 const onSend = ()=>
 {
-
+    console.log(myInfomation)
 }
 
 </script>

@@ -1,14 +1,14 @@
 <template>
   <el-container>
     <el-header>
-      <MyState></MyState>
+      <MyState v-if= statePool.isLogin></MyState>
     </el-header>
     <el-main>
       <el-dialog v-model="loginVisible" title="Tips" width="500" align-center :show-close="false"
         :close-on-click-modal="false" :close-on-press-escape="false">
         <UserLogin />
       </el-dialog>
-      <ChatRoom>
+      <ChatRoom v-if= statePool.isLogin>
       </ChatRoom>
     </el-main>
   </el-container>
@@ -19,15 +19,17 @@ import UserLogin from './views/UserLogin.vue'
 import ChatRoom from './views/ChatRoom.vue'
 import MyState from './views/MyState.vue'
 import { ref, watch, provide, reactive } from 'vue';
+import { XMPPService } from './xmpp/xmpp.js';
+
 const statePool = reactive(
   {
     isLogin: false,
   });
 const myInfomation = reactive(
   {
-    userName:"tester",
+    nickName:"tester",
     lastLoginTime:"000",
-    myIPaddress:"0.0.0.0"
+    jid:"000",
   }
 )
 const loginVisible = ref(true);
@@ -36,8 +38,13 @@ watch(() => statePool.isLogin,
     loginVisible.value = !isLogin;
   }
 )
-provide('statePool', statePool)
+
+var myXMPP = new XMPPService()
+provide('myXMPP', myXMPP)
 provide('myInfomation', myInfomation)
+provide('statePool', statePool)
+
+
 </script>
 
 <style>
