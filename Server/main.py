@@ -46,10 +46,12 @@ async def handleConnection(websocket:websockets.WebSocketServerProtocol):
                 continue
             await websocket.send(reply)       
     except websockets.exceptions.ConnectionClosed as e:
+        websocket.close()
         print(f"Connection closed: {e}")
+    
 
 if __name__ == '__main__':
-    start_server = websockets.serve(handleConnection, host, port,ping_timeout=10,ping_interval=10)
+    start_server = websockets.serve(handleConnection, host, port,ping_timeout=20,ping_interval=10)
     print("[+]Service start")
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()

@@ -25,6 +25,7 @@ class Session():
         self.clientKey:rsa.RSAPublicKey = ""
         self.serverPublicKey = ""
         self.serverPrivateKey = ""
+        self.isAlive = False
     def encrypt(self,data:str):
         return(self.clientKey.encrypt(data.encode('utf-8'),defaultPadding))
     def send(self,data):
@@ -64,3 +65,7 @@ class SessionManagement():
         if(len(self.pool)<=1):
             return [] 
         return list(self.pool.keys())
+    def setClientAlive(self,key,state:bool):
+        self.getSession(key).isAlive = state
+    def getClientAlive(self,key):
+        return self.getSession(key)

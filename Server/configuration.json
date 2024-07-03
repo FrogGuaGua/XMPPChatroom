@@ -1,0 +1,30 @@
+{
+    "domain": {
+        "domain1": {
+            "address": "",
+            "publickey": "",
+            "passive":"True"
+        },
+        "domain2": {
+            "address": "",
+            "publickey": "",
+            "passive":"True"
+        },
+        "gdomain3": {
+            "address": "",
+            "publickey": "",
+            "passive":"True"
+        }
+    },
+    "server": {
+        "toClient": {
+            "host": "",
+            "port": ""
+        },
+        "toServer": {
+            "host": "",
+            "port": ""
+        },
+        "privateKeyPath":"private.pem"
+    }
+}

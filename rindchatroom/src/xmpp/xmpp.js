@@ -20,6 +20,7 @@ class XMPPService {
     this.selfKey = ""
     this.serverKey = ""
     this.crypt = pki.rsa
+    this.serverAlive = true
     Object.defineProperty(this, 'stage', {
       get: () => this._stage,
       set: (v) => {
@@ -93,6 +94,10 @@ class XMPPService {
   }
   chatting() {
     this.onmessage = (event) => {
+      if(event.data == "pong"){
+        this.serverAlive = true
+        return
+      }
       let xmlReader = new DOMParser()
       let xml = xmlReader.parseFromString(event.data, "application/xml")
       let attendance = xml.querySelector('attendance')
@@ -108,6 +113,17 @@ class XMPPService {
         this.myxml.message = message
       }
     }
+    
+  }
+  heartBeat(){
+    this.heartBeatProcess = setTimeout(() => {
+      if(!this.serverAlive){
+        console.error("Server missing")
+      }
+      this.socket.send("ping")
+      this.serverAlive = false
+    }, 10);
+
   }
   secureSend(data) {
     let b64data = btoa(this.serverKey.encrypt(data, 'RSA-OAEP', {
@@ -128,26 +144,6 @@ class XMPPService {
         md: md.sha1.create()
       }
     })
-  }
-  xmlToObject(xml) {
-
-    if (!xml.children.length) {
-      return xml.textContent;
-    }
-
-    let obj = {};
-    for (let child of xml.children) {
-      let childObject = this.xmlToObject(child);
-      if (obj[child.nodeName] === undefined) {
-        obj[child.nodeName] = childObject;
-      } else {
-        if (!Array.isArray(obj[child.nodeName])) {
-          obj[child.nodeName] = [obj[child.nodeName]];
-        }
-        obj[child.nodeName].push(childObject);
-      }
-    }
-    return obj;
   }
   getSocket() {
     return this.socket

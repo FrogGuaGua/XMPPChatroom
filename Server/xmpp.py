@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from management import SessionManagement,Session
 import websockets
-from security import generateRSAKeypair,keyToPem
+from security import generateRSAKeypair,publickeyToPem
 from cryptography.hazmat.primitives import serialization
 from typing import List
 XMPPState = {
@@ -37,9 +37,9 @@ class XMPPService():
         if tag == "proceed" and sessionManagement.getSessionState(userMark) == XMPPState["connecting"]:
             sessionManagement.setClientKey(userMark,serialization.load_pem_public_key(attr["key"].encode('utf-8')))
             sessionManagement.setSessionState(userMark,XMPPState["loggin"])
-            privateKey,publicKey = generateRSAKeypair()
+            publicKey,privateKey = generateRSAKeypair()
             sessionManagement.setServerKey(userMark,publicKey,privateKey)
-            return self.TLSSuccess(attr,keyToPem(publicKey))
+            return self.TLSSuccess(attr,publickeyToPem(publicKey))
         if tag == "login" and sessionManagement.getSessionState(userMark) == XMPPState["loggin"]:
             sessionManagement.setSessionState(userMark,XMPPState["chatting"])
             return self.processLogin(attr,userMark,sessionManagement)
@@ -64,6 +64,7 @@ class XMPPService():
         jid = "jid"
         attendance = "<attendance nickname ='{}' jid = '{}'>".format(nickname,jid)
         if (True):
+            sessionManagement.setClientAlive(userMark,True)
             if(len(sessionManagement.pool)>1):
                 targets:List[Session] = sessionManagement.getOnline(userMark)
                 for i in targets:
