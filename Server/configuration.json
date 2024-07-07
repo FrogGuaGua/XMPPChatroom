@@ -2,17 +2,7 @@
     "domain": {
         "domain1": {
             "address": "",
-            "publickey": "",
-            "passive":"True"
-        },
-        "domain2": {
-            "address": "",
-            "publickey": "",
-            "passive":"True"
-        },
-        "gdomain3": {
-            "address": "",
-            "publickey": "",
+            "publickey": "public.pem",
             "passive":"True"
         }
     },

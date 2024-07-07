@@ -1,11 +1,11 @@
 <template>
-    <el-card body-class="chat-content-box">
+    <el-card body-class="chat-message-box">
         <template #header>
-            <el-text>{{nickName }}</el-text>
+            <div style="text-align: center;">
+                <el-text size="large"  style="font-size: 30px;">{{ statePool.currentPage }}</el-text>
+            </div>
         </template>
-        <div>
-
-        </div>
+        <ChatContent></ChatContent>
         <template #footer>
             <el-row :gutter="24">
                 <el-col :span="22">
@@ -22,14 +22,12 @@
 <script setup>
 import { ref } from 'vue';
 import { inject } from 'vue';
+import ChatContent from "@/components/ChatContent.vue"
 
 const myInfomation = inject('myInfomation');
-
-
-const nickName = ref("")
+const statePool = inject('statePool')
 const userInput = ref("")
-const onSend = ()=>
-{
+const onSend = () => {
     console.log(myInfomation)
 }
 
@@ -39,7 +37,8 @@ const onSend = ()=>
 .el-button {
     height: 100%;
 }
-.chat-content-box{
+
+.chat-message-box {
     height: 70%
 }
 </style>

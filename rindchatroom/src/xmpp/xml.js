@@ -6,6 +6,8 @@ class xmlManagement {
         const xmlString = '<root></root>';
         this.xml = this.parser.parseFromString(xmlString, 'application/xml');
         this.root = this.xml.documentElement;
+        this.initMessage()
+        this.initPresence()
     }
     startStream()
     {
@@ -16,16 +18,13 @@ class xmlManagement {
         stream.setAttribute('version', '1.0');
         this.stream = this.root.appendChild(stream);
     }
-    startPresence()
+    initPresence()
     {
-        let presence = this.xml.createElement('presence');
-        presence.setAttribute("publicRoom","publicRoom")
-        this.presence = this.stream.appendChild(presence);
+        this.presence = this.xml.createElement('presence');
     }
-    startMessage()
+    initMessage()
     {
-        let message = this.xml.createElement('message');
-        this.message = this.stream.appendChild(message);
+        this.message = this.xml.createElement('message');
     }
     toString(xmlElement)
     {

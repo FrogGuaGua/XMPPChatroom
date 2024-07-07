@@ -1,12 +1,12 @@
-import json
-import websockets
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-from types import list
+import json
+import websockets
 import threading
 import time
-from security import RSASetting
 import base64
+import asyncio
+from security import RSASetting
 
 class Configuration():
     def __init__(self) -> None:
@@ -14,7 +14,9 @@ class Configuration():
         self.file =  open(self.filename,'r',encoding='utf-8') 
         self.configuration = (json.load(self.file ))
         pem = open(self.getServerInfo()["privateKeyPath"],encoding="utf-8")
-        self.privateKey:rsa.RSAPrivateKey = serialization.load_pem_private_key(pem)
+        privateKey = pem.read().encode("utf-8")
+        self.privateKey:rsa.RSAPrivateKey = serialization.load_pem_private_key(data=privateKey,password=None,backend=None)
+        pem.close()
         self.file.close()
     def getDomainInfo(self)->dict:
         return self.configuration['domain']
@@ -43,22 +45,23 @@ class domainServer():
         self.domainPool = {}
         # store thread
         self.threadPool = []
-        # store task
-        self.taskPool = []
         self.config = Configuration()
-        self.init()
-    def init(self):
+    async def init(self):
         domain = self.config.getDomainInfo()
         serverInfo = self.config.getServerInfo()
-        self.privateKey = serialization.load_pem_private_key()
         for i in self.config.getDomainInfo().keys():
-            self.domainPool[domain[i]["address"]] = Domain("ws://"+domain[i]["address"],serialization.load_pem_public_key(domain[i]["publickey"]),domain[i]["passive"])
+            file = open(domain[i]["publickey"],"r")
+            pem = file.read().encode("utf-8")
+            self.domainPool[domain[i]["address"]] = Domain("ws://"+domain[i]["address"],pem,bool(domain[i]["passive"]))
+            file.close()
         self.initThreadPool()
         async def taskHandel(websocket:websockets.WebSocketServerProtocol):
             ip = websocket.request_headers["Origin"]
             try:
                 async for message in websocket:
+                    # ban unexcept ip
                     if(not ip in self.domainPool):
+                        print("unexcept info")
                         websocket.close()
                     # if get heart beat return
                     if(message == "ping" or message == "pong"):
@@ -70,15 +73,26 @@ class domainServer():
                         message = base64.b64decode(self.config.decrypt(message))                   
             except(websockets.ProtocolError):
                 print("server to server error")
-        self.gateway = websockets.serve(taskHandel,serverInfo["toServer"]["host"],serverInfo["toServer"]["port"])
+        self.gateway = await websockets.serve(taskHandel,serverInfo["toServer"]["host"],serverInfo["toServer"]["port"],
+                                        origins=list(self.domainPool.keys()))
+        await self.gateway.serve_forever()
     def initThreadPool(self):
         def heartbeatHandle(domain:Domain):
             while True:
                 domain.send("3")
                 domain.stack+=1
+                if(domain.stack >= 3):
+                    domain.isAlive = False
+                    if(not domain.isPassive):
+                        try:
+                            domain.websocket.close()
+                            domain.websocket = websockets.connect(domain.address)
+                        except:
+                            print("reconnent error")
                 time.sleep(10)
-        for i in self.domainPool.items():
-            if(not i.isPassive):
+
+        for i in self.domainPool.values():
+            if(i.isPassive):
                 i.websocket = websockets.connect(i.address)
                 thread = threading.Thread(target=heartbeatHandle,args=i)
                 thread.daemon = True
@@ -93,5 +107,11 @@ class domainServer():
         else:
             return False
                 
-            
+
+
+
         
+
+
+a = domainServer()
+asyncio.run(a.init())

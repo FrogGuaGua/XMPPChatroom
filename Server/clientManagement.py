@@ -17,7 +17,7 @@ defaultPadding = padding.OAEP(
         algorithm=hashes.SHA256(),
         label=None
     )
-class Session():
+class Client():
     def __init__(self,socketStream:websockets.WebSocketServerProtocol) -> None:
         self.stage = XMPPState["initing"]
         XMPPState["initing"]
@@ -25,6 +25,7 @@ class Session():
         self.clientKey:rsa.RSAPublicKey = ""
         self.serverPublicKey = ""
         self.serverPrivateKey = ""
+        self.ipaddress= ""
         self.isAlive = False
     def encrypt(self,data:str):
         return(self.clientKey.encrypt(data.encode('utf-8'),defaultPadding))
@@ -32,15 +33,15 @@ class Session():
         self.socketStream.send(base64.b64encode(self.encrypt(data)))
 
 
-class SessionManagement():
+class ClientManagement():
     def __init__(self) -> None:
-        self.pool = {}
+        self.sessionPool = {}
     def newSession(self,key,socket):
-        self.pool[key] = Session(socket)
+        self.sessionPool[key] = Client(socket)
     def hasSession(self,key):
-        return key in self.pool.keys()
-    def getSession(self,key)->Session:
-        return self.pool[key]
+        return key in self.sessionPool.keys()
+    def getSession(self,key)->Client:
+        return self.sessionPool[key]
     def getSessionState(self,key):
         return self.getSession(key).stage
     def setSessionState(self,key,state):
@@ -56,16 +57,21 @@ class SessionManagement():
     def setServerKey(self,key,publickey,privatekey):
         self.getSession(key).serverPublicKey= publickey
         self.getSession(key).serverPrivateKey= privatekey
-    def getOnline(self,exclude = None):
-        if(len(self.pool)<=1):
+    
+    def getPresence(self,exclude = None):
+        if(len(self.sessionPool)<=1):
             return [] 
-        onlineUsers = list(self.pool.keys()).remove(exclude)
-        return [self.pool[i] for i in onlineUsers]
+        onlineUsers = list(self.sessionPool.keys()).remove(exclude)
+        print(onlineUsers)
+        if(not onlineUsers):
+            return [] 
+        return [self.sessionPool[i] for i in onlineUsers]
     def getOnlineUserMarks(self):
-        if(len(self.pool)<=1):
+        if(len(self.sessionPool)<=1):
             return [] 
-        return list(self.pool.keys())
+        return list(self.sessionPool.keys())
     def setClientAlive(self,key,state:bool):
         self.getSession(key).isAlive = state
     def getClientAlive(self,key):
         return self.getSession(key)
+    

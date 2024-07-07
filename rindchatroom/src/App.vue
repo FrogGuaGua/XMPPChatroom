@@ -24,6 +24,7 @@ import { XMPPService } from './xmpp/xmpp.js';
 const statePool = reactive(
   {
     isLogin: false,
+    currentPage:"public"
   });
 const myInfomation = reactive(
   {

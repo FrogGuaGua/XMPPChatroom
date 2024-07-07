@@ -94,36 +94,85 @@ class XMPPService {
   }
   chatting() {
     this.onmessage = (event) => {
-      if(event.data == "pong"){
+      if (event.data == "pong") {
         this.serverAlive = true
         return
       }
       let xmlReader = new DOMParser()
       let xml = xmlReader.parseFromString(event.data, "application/xml")
-      let attendance = xml.querySelector('attendance')
-      if (attendance) {
-        this.myxml.presence.setAttribute(attendance.getAttribute("jid"), attendance.getAttribute("nickname"))
+      let newPresence = xml.querySelector('presence')
+      // <presence> 
+      //     <client jid="1" nickname="rind" publickey="" ip=“”> 
+      //     </client> 
+      //   <client jid="1" nickname="rind" publickey="" ip=“”> 
+      //     </client>
+      // </presence>
+      if (newPresence) {
+        newPresence.querySelectorAll('client').forEach(client => {
+          client.setAttribute('status', 'online')
+        });
+        var oldPresenceMap = new Map();
+        var newPresenceMap = new Map();
+        // 根据旧的在线表创建索引map
+        this.presence.querySelectorAll('client').forEach(client => {
+          var jid = client.getAttribute('jid');
+          oldPresenceMap.set(jid, client);
+        });
+        newPresence.querySelectorAll('client').forEach(client => {
+          var jid = client.getAttribute('jid');
+          newPresenceMap.set(jid, client);
+        });
+        // 如果旧表新表都有 则将新表中的信息更新到旧表
+        // 如果新表没有 旧表有 则设为不在线
+        // 如果旧表没有 新表有则将该元素复制进旧表
+        this.myxml.presence.querySelectorAll('client').forEach(oldClient => {
+          var jid = oldClient.getAttribute('jid');
+          if (newPresenceMap.has(jid)) {
+            var newClient = oldPresenceMap.get(jid);
+            Array.from(newClient.attributes).forEach(attr => {
+              oldClient.setAttribute(attr.name, attr.value);
+            });
+          } else {
+            oldClient.setAttribute('status', 'offline');
+          }
+        });
+        newPresence.querySelectorAll('client').forEach(newClient => {
+          var jid = newClient.getAttribute('jid');
+          if (!oldPresenceMap.has(jid)) {
+            this.myxml.presence.documentElement.appendChild(newClient)
+          } 
+        });
+        console.log("presence updated")
+        return
       }
       let quit = xml.querySelector('quit')
       if (quit) {
         this.myxml.presence.removeAttribute(quit.getAttribute('jid'))
+        return
       }
       let message = xml.querySelector('message')
       if (message) {
-        this.myxml.message = message
+        this.myxml.message.appendChild(message)
+        return
       }
     }
-    
+
   }
-  heartBeat(){
+  heartBeat() {
     this.heartBeatProcess = setTimeout(() => {
-      if(!this.serverAlive){
+      if (!this.serverAlive) {
         console.error("Server missing")
       }
       this.socket.send("ping")
       this.serverAlive = false
     }, 10);
 
+  }
+  getPresence(){
+    return this.myxml.presence
+  }
+  getMessage(){
+    return this.myxml.message
   }
   secureSend(data) {
     let b64data = btoa(this.serverKey.encrypt(data, 'RSA-OAEP', {

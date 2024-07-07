@@ -1,20 +1,16 @@
 <template>
-  <UserCard 
-      v-for="user in userList.userList" 
-      :key="user.nickName" 
-      :nick-name="user.nickName" 
-      :last-message="user.lastMessage" 
-    />
+  <UserCard v-for="(user, index) in userList.userList" :key="index" :nick-name="user.attributes.nickname"
+    :status="user.attributes.status" :jid="user.attributes.jid"/>
 </template>
 
 <script setup>
 import { defineProps } from 'vue';
 import UserCard from "@/components/UserCard.vue";
-const userList= defineProps({
+const userList = defineProps({
   userList: {
     type: Array,
-    required: true,
-    default: () => ["test","test"]
+    required: true
   }
 });
+console.log(userList.userList)
 </script>

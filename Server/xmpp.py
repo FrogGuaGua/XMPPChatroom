@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from management import SessionManagement,Session
+from clientManagement import ClientManagement,Client
 import websockets
 from security import generateRSAKeypair,publickeyToPem
 from cryptography.hazmat.primitives import serialization
@@ -26,7 +26,7 @@ class XMPPService():
         except ET.ParseError as e:
             print(f"Failed to parse XML: {e}")
     
-    def messageProcess(self,tag,attr,sessionManagement:SessionManagement,websocket:websockets.WebSocketServerProtocol):
+    def messageProcess(self,tag,attr,sessionManagement:ClientManagement,websocket:websockets.WebSocketServerProtocol):
         userMark = websocket.request_headers["Sec-WebSocket-Key"]
         if tag == "{http://etherx.jabber.org/streams}stream" and not sessionManagement.hasSession(userMark):
             sessionManagement.newSession(userMark,websocket)
@@ -57,7 +57,7 @@ class XMPPService():
             return "<proceed xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>"
     def TLSSuccess(self,attr,publickey)->str:
         return "<proceed key ='{}' mechanism='MD5,PLAIN'>".format(publickey)
-    def processLogin(self,attr,userMark,sessionManagement:SessionManagement)->str:
+    def processLogin(self,attr,userMark,sessionManagement:ClientManagement)->str:
         username = attr['username']
         password = attr['password']
         nickname = "nickname"
@@ -65,8 +65,8 @@ class XMPPService():
         attendance = "<attendance nickname ='{}' jid = '{}'>".format(nickname,jid)
         if (True):
             sessionManagement.setClientAlive(userMark,True)
-            if(len(sessionManagement.pool)>1):
-                targets:List[Session] = sessionManagement.getOnline(userMark)
+            if(len(sessionManagement.sessionPool)>1):
+                targets:List[Client] = sessionManagement.getPresence(userMark)
                 for i in targets:
                     i.send(attendance)
             return "<update nickname ='{}' lasttime='{}' jid='{}'>".format("123","123","123")

@@ -7,7 +7,7 @@
             </div>
         </template>
         <div class="status-container" >
-            <el-text>{{ getStatus() }}</el-text>
+            <el-text>OnlineUser: {{ getStatus() }}</el-text>
         </div>
     </el-card>
 </template>

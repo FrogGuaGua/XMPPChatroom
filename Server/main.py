@@ -8,14 +8,15 @@ import asyncio
 import xml.etree.ElementTree as ET
 import websockets
 import xmpp 
-from management import SessionManagement
+from clientManagement import ClientManagement
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 import base64
 
-host = '10.0.0.109'
+# host = '10.0.0.109'
+host = '10.13.84.131'
 port = 64442
-sessionManagement = SessionManagement()
+sessionManagement = ClientManagement()
 XMPPState = {
   "initing": 0,
   "connecting":1,
@@ -30,6 +31,17 @@ defaultPadding = padding.OAEP(
         algorithm=hashes.SHA256(),
         label=None
     )
+
+
+async def userStateUpdate(websocket:websockets.WebSocketServerProtocol,index):
+    async for message in websocket:
+        if(message == "ping"):
+            await websocket.send("pong")
+
+
+
+
+
 async def handleConnection(websocket:websockets.WebSocketServerProtocol):
     try:
         index = websocket.request_headers["Sec-WebSocket-Key"]
@@ -37,21 +49,21 @@ async def handleConnection(websocket:websockets.WebSocketServerProtocol):
             if(sessionManagement.hasSession(index) and sessionManagement.getSessionState(index) >= XMPPState["loggin"]):
                 message = base64.b64decode(message)
                 message = sessionManagement.getServerPrivateKey(index).decrypt(message,defaultPadding).decode('utf-8')
-            # print(message)
             info = xmpp.xmlTransformer(message)
             reply = xmpp.messageProcess(info.tag,info.attrib,sessionManagement,websocket) 
             if(sessionManagement.hasSession(index) and sessionManagement.getSessionState(index) > XMPPState["loggin"]):
                 reply = base64.b64encode(sessionManagement.getSession(index).encrypt(reply)).decode('utf-8')
             if(not reply):
                 continue
-            await websocket.send(reply)       
+            await websocket.send(reply)    
     except websockets.exceptions.ConnectionClosed as e:
         websocket.close()
         print(f"Connection closed: {e}")
     
+    
 
 if __name__ == '__main__':
-    start_server = websockets.serve(handleConnection, host, port,ping_timeout=20,ping_interval=10)
+    startServer = websockets.serve(handleConnection, host, port,ping_timeout=20,ping_interval=10)
     print("[+]Service start")
-    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_until_complete(startServer)
     asyncio.get_event_loop().run_forever()
