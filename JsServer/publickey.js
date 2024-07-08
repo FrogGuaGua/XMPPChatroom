@@ -1,0 +1,11 @@
+const publicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA294oR8tzdtGsbzYcEG46
+dRg2drQRHYryTb4fUH6RG2HUdIvobm4WQcpV8zcxHcQYhub5c3V1eNAbC0X22MGq
+1LEiGKnyPWj82QFvDwwhqZbZihAXZ0474/fXmQKXaxtfEoV/LYwxfa0HsnEVDVoj
+AieehTUvjMERn5oV1igHHwV+H2DAMP8H2qlKe/KePhECIExjeaFqouxGhquPWHc0
+QKqns8sEbiyLWn9OvwM084F2bqlXZsgMDrugwzndhtNWNcT2Lq6hm7IWDKfuVzvZ
+V5ZwLttUvf/jY2yvWtDXGGmzqy8JNo54n3XhzYqSKGN+FCnwfTmZA+66NEOznYZ+
+owIDAQAB
+-----END PUBLIC KEY-----
+` 
+export default publicKey

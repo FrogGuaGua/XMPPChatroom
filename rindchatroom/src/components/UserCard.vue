@@ -2,40 +2,36 @@
     <el-card @click="readMessage" shadow="hover" :class="messageBlink()">
         <template #header>
             <div style="display: flex; justify-content: space-between;">
-                <el-text size="large">{{ getUserName() }}</el-text>
-                <el-text type="info">{{ getJID() }}</el-text>
+                <el-text size="large">{{ user.nickname }}</el-text>
+                <el-text type="info">{{ user.jid }}</el-text>
             </div>
         </template>
-        <div class="status-container" >
-            <el-text>{{ getStatus() }}</el-text>
+        <div class="status-container" style="display: flex; justify-content: space-between;" >
+            <el-text>{{ user.status }}</el-text>
+            <el-text type="info">{{ user.ip }}</el-text>
         </div>
     </el-card>
 </template>
 
 <script setup>
-import { defineProps, ref } from 'vue';
+
+import { defineProps, inject, ref } from 'vue';
 
 const user = defineProps(
     {
-        nickName: String,
+        nickname: String,
         jid: String,
-        status: String
+        status: String,
+        ip:String,
     })
-const getUserName = () => {
-    return user.nickName
-}
-const getStatus = () => {
-    return user.status
-}
-const getJID = () => {
-    return user.jid
-}
 const hasNewMessage = ref(false)
 const messageBlink = () => {
     return hasNewMessage.value == true ? "blinking-green" : ""
 }
+const statePool = inject("statePool")
 const readMessage = () => {
     hasNewMessage.value = false
+    statePool.currentPage = {nickname:user.nickname,jid:user.jid,status:user.status,ip:user.ip}
 }
 </script>
 

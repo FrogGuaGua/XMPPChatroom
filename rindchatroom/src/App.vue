@@ -1,14 +1,14 @@
 <template>
   <el-container>
     <el-header>
-      <MyState v-if= statePool.isLogin></MyState>
+      <MyState v-if=statePool.isLogin></MyState>
     </el-header>
     <el-main>
       <el-dialog v-model="loginVisible" title="Tips" width="500" align-center :show-close="false"
         :close-on-click-modal="false" :close-on-press-escape="false">
         <UserLogin />
       </el-dialog>
-      <ChatRoom v-if= statePool.isLogin>
+      <ChatRoom v-if=statePool.isLogin>
       </ChatRoom>
     </el-main>
   </el-container>
@@ -19,20 +19,52 @@ import UserLogin from './views/UserLogin.vue'
 import ChatRoom from './views/ChatRoom.vue'
 import MyState from './views/MyState.vue'
 import { ref, watch, provide, reactive } from 'vue';
-import { XMPPService } from './xmpp/xmpp.js';
+import publicKey from './utils/publickey';
+import { pki, md } from 'node-forge';
 
+
+
+const clientState = {
+  init: 0,
+  login: 1,
+  chat: 2
+}
+const publickey = pki.publicKeyFromPem(publicKey)
+const serverEncrypt = (data) => {
+  atob(publickey.encrypt(data, 'RSA-OAEP', {
+    md: md.sha256.create(),
+    mgf1: {
+      md: md.sha1.create()
+    }
+  }))
+}
 const statePool = reactive(
   {
     isLogin: false,
-    currentPage:"public"
+    currentPage: {
+      nickname: String,
+      jid: String,
+      status: String,
+      ip: String,
+    },
+    serverIP: "",
+    serverPort: "",
+    state: clientState.init,
   });
 const myInfomation = reactive(
   {
-    nickName:"tester",
-    lastLoginTime:"000",
-    jid:"000",
+    nickName: "tester",
+    lastLoginTime: "000",
+    jid: "000",
+    presence: {},
+    chatlog:[],
+    websocket:"",
+    security:""
   }
 )
+
+
+
 const loginVisible = ref(true);
 watch(() => statePool.isLogin,
   (isLogin) => {
@@ -40,10 +72,9 @@ watch(() => statePool.isLogin,
   }
 )
 
-var myXMPP = new XMPPService()
-provide('myXMPP', myXMPP)
 provide('myInfomation', myInfomation)
 provide('statePool', statePool)
+provide('serverEncrypt', serverEncrypt)
 
 
 </script>
@@ -55,5 +86,4 @@ provide('statePool', statePool)
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
-
 </style>

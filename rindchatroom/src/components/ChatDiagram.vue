@@ -2,7 +2,8 @@
     <el-card body-class="chat-message-box">
         <template #header>
             <div style="text-align: center;">
-                <el-text size="large"  style="font-size: 30px;">{{ statePool.currentPage }}</el-text>
+                <el-text size="large"  style="font-size: 30px;">{{ statePool.currentPage.nickname }}</el-text>
+                <el-text type="info">{{ statePool.currentPage.jid }}</el-text>
             </div>
         </template>
         <ChatContent></ChatContent>
@@ -23,13 +24,21 @@
 import { ref } from 'vue';
 import { inject } from 'vue';
 import ChatContent from "@/components/ChatContent.vue"
+import { protocal } from '@/utils/protocol';
 
 const myInfomation = inject('myInfomation');
 const statePool = inject('statePool')
 const userInput = ref("")
 const onSend = () => {
-    console.log(myInfomation)
+    let info = protocal.message()
+    info.from = myInfomation.jid
+    info.to = statePool.currentPage.jid
+    info.type = "info"
+    info.info = userInput.value
+    myInfomation.websocket.send(JSON.stringify(info))
+    userInput.value = ""
 }
+
 
 </script>
 

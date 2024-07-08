@@ -1,38 +1,33 @@
 <template>
-    <div :style="userListHeight()">
-        <ChatMessage></ChatMessage>
+    <div :style="userListHeight()" class="user-contect">
+        <ChatMessage v-for="(value, index) in getCurrentChat()" :key="index" :from="value.from" :to="value.to"
+            :info="value.info" :time="value.time">
+        </ChatMessage>
     </div>
 </template>
 <script setup>
-import { inject,ref, watch } from 'vue';
-import { Parser } from 'xml2js';
+import { inject, ref } from 'vue';
 import ChatMessage from "@/components/ChatMessage.vue"
 
 const pageHeight = ref(document.documentElement.clientHeight)
 const userListHeight = () => {
-    return "height: " + pageHeight.value * 0.75 + "px"
+    return "height: " + pageHeight.value * 0.51 + "px"
 }
+const myInfomation = inject("myInfomation")
 const statePool = inject("statePool")
-
-const parser = new Parser({
-    attrkey: 'attributes',
-    explicitArray: false
-});
-const chatttingInfo =ref()
-const chatXML = `<message>
-    <chat from='C1@S1' to='C1@S2' type='info'  data='kjsets' /> 
-    <chat from='C1@S1' to='C1@S2' type='info'  data='12kjsets' /> 
-</message>`
-
-watch(() => statePool.currentPage, () => {
-    parser.parseString(chatXML, (err, result) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        chatttingInfo.value = result.message
+const getCurrentChat = () =>{
+    let currentChat = myInfomation.chatlog.filter(m => {
+        return m.from === statePool.currentPage.jid || m.to === statePool.currentPage.jid
     })
+    return currentChat
 }
-)
 
 </script>
+<style scoped>
+.user-contect {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    overflow: auto;
+}
+</style>

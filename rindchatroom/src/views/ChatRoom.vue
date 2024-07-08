@@ -2,8 +2,8 @@
   <el-row :gutter="24">
     <el-col :span="6">
       <ul class="user-list" :style="userListHeight()">
-        <PublicRoom :nick-name="publicRoom.nickname" :jid="publicRoom.jid" :status="publicRoom.status"></PublicRoom>
-        <UserList :user-list="users"></UserList>
+        <PublicRoom :nickname="publicRoom.nickname" :jid="publicRoom.jid" :ip="publicRoom.ip" :status="publicRoom.status"></PublicRoom>
+        <UserList :user-list="myInfo.presence"></UserList>
       </ul>
     </el-col>
     <el-col :span="18">
@@ -17,41 +17,22 @@
 import UserList from "@/components/UserList.vue";
 import PublicRoom from "@/components/PublicRoom.vue";
 import ChatDiagram from "@/components/ChatDiagram.vue"
-import { ref } from "vue";
-import { Parser } from "xml2js";
-// const myXMPP = inject('myXMPP')
+import { inject, ref } from "vue";
+
 const pageHeight = ref(document.documentElement.clientHeight)
 const userListHeight = () => {
-  return "height: " + pageHeight.value * 0.85 + "px"
+  return "height: " + pageHeight.value * 0.81 + "px"
 }
 
 const publicRoom = {
   nickname: "PublicRoom",
   jid: "public",
-  status: "asdasd"
+  status:"",
+  ip:""
 }
+const myInfo = inject("myInfomation")
 
-var presenceXML = `
-<presence>
-  <client jid="rd@s1" nickname="rind2" publickey="" ip="" status="online"></client>
-  <client jid="3" nickname="sam" publickey="" ip="" status="offline"></client>
-  <client jid="2" nickname="alex" publickey="" ip="" status="online"></client>
-  <client jid="r1d@s1" nickname="rind2" publickey="" ip="" status="online"></client>
-  <client jid="32" nickname="sam" publickey="" ip="" status="offline"></client>
-  <client jid="22" nickname="alex" publickey="" ip="" status="online"></client>
-</presence>`;
-const parser = new Parser({
-  attrkey: 'attributes',
-  explicitArray: false
-});
-const users = ref("")
-parser.parseString(presenceXML, (err, result) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  users.value = result.presence.client
-})
+
 </script>
 
 <style>
