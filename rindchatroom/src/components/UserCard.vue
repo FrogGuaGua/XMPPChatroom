@@ -8,7 +8,6 @@
         </template>
         <div class="status-container" style="display: flex; justify-content: space-between;" >
             <el-text>{{ user.status }}</el-text>
-            <el-text type="info">{{ user.ip }}</el-text>
         </div>
     </el-card>
 </template>
@@ -22,7 +21,6 @@ const user = defineProps(
         nickname: String,
         jid: String,
         status: String,
-        ip:String,
     })
 const hasNewMessage = ref(false)
 const messageBlink = () => {

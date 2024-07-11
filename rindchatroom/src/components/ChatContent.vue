@@ -15,11 +15,25 @@ const userListHeight = () => {
 }
 const myInfomation = inject("myInfomation")
 const statePool = inject("statePool")
-const getCurrentChat = () =>{
-    let currentChat = myInfomation.chatlog.filter(m => {
-        return m.from === statePool.currentPage.jid || m.to === statePool.currentPage.jid
-    })
-    return currentChat
+const getCurrentChat = () => {
+    if (statePool.currentPage.jid == "public") {
+        let currentChat = myInfomation.chatlog.filter(messages => {
+            return messages.to === statePool.currentPage.jid
+        })
+        return currentChat
+    }
+    if (statePool.currentPage.jid == myInfomation.jid) {
+        let currentChat = myInfomation.chatlog.filter(messages => {
+            return messages.to === myInfomation.jid && messages.from === myInfomation.jid
+        })
+        return currentChat
+    }
+    else {
+        let currentChat = myInfomation.chatlog.filter(messages => {
+            return messages.from === statePool.currentPage.jid || messages.to === statePool.currentPage.jid
+        })
+        return currentChat
+    }
 }
 
 </script>

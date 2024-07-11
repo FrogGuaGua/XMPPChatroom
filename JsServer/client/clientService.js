@@ -7,9 +7,8 @@ const protocal = require("../util/protocol");
 const port = 4567
 
 class Client {
-    constructor(nickname, ip, jid,socket) {
+    constructor(nickname, jid, socket) {
         this.nickname = nickname
-        this.ip = ip
         this.jid = jid
         this.status = "online"
         this.socket = socket
@@ -18,7 +17,6 @@ class Client {
     getInfo() {
         let info = userInfo()
         info.jid = this.jid
-        info.ip = this.ip
         info.nickname = this.nickname
         info.status = this.status
         return info
@@ -31,45 +29,61 @@ class ClientService {
         this.security = new RSAOAEP2048();
         this.server = new WebSocket.Server({ port: port })
         this.clientPool = []
-        this.pubicRoom = []
-        setInterval(()=>{
-            this.clientPool.forEach(client=>{
-                client.stack+=1
-                if(client.stack == 4){
-                    client.socket.close()
-                }
-            })
-        },5000)
-        file.saveToFile(file.toJS(this.security.publicKeyPem), "publickey.js")
-        this.server.on("connection", (socket) => {
-            socket.on('message', (message) => {
-                message = JSON.parse(message)
-                // console.log(message)
-                if (message.tag == "login") {
-                    if (this.login(message, socket)) {
-                        socket.send(JSON.stringify(this.getPresence()))
-                        socket.send(JSON.stringify(this.pubicRoom))
+        setInterval(() => {
+            this.clientPool.forEach(client => {
+                if(client){
+                    client.stack += 1
+                    if (client.stack == 4) {
+                        client.socket.close()
                     }
                 }
+            })
+        }, 5000)
+        file.saveToFile(file.toJS(this.security.publicKeyPem), "publickey.js")
+        this.server.on("connection", async (socket) => {
+            socket.on('message', (message) => {
+                try {
+                    message = JSON.parse(message)
+                } catch (error) {
+                    socket.close()
+                    console.error("JSON :", error);
+                }
+                if (message.tag == "login") {
+                    this.login(message, socket)
+                }
                 if (message.tag == "signup") {
+                    this.signup(message, socket)
                 }
                 if (message.tag == "message") {
                     this.message(message, socket)
                 }
-                if(message.tag == "check"){
-                    this.check(message,socket)
+                if (message.tag == "check") {
+                    this.check(message, socket)
                 }
-                
+                console.log(message)
+
             });
-            socket.on('close',()=>{
-                let removeIndex = this.clientPool.findIndex((client)=>{client == socket })
+            socket.on('close', () => {
+                let removeIndex = this.clientPool.findIndex((client) => { client == socket })
                 this.clientPool.splice(removeIndex)
-                this.broadcast(JSON.stringify(this.getPresence()))
+                this.boadrdcastPresence()
                 console.log("Client disconnect")
             })
         })
     }
-    check(message,socket){
+    async signup(message,socket){
+        let username = message.username
+        let password = message.password
+        let result = await global.databaseManagement.registerUser(username,password)
+        if(result){
+            socket.send(JSON.stringify(protocal.signupSuccess()))
+        }
+        else{
+            socket.send(JSON.stringify(protocal.signupFail()))
+        }
+        socket.close()
+    }
+    check(message, socket) {
         let client = this.getClientBySocket(socket)[0]
         client.stack = 0
     }
@@ -81,23 +95,26 @@ class ClientService {
         minfo.time = (new Date()).toString()
         global.taskQueue.enqueue(minfo)
     }
-    login(message, socket) {
+    async login(message, socket) {
         let username = message.username
-        let password = CryptoJS.MD5(message.password).toString()
-        if (true) {
-            let ret = loginSuccess()
-            ret.nickname = "123"
-            socket.send(JSON.stringify(ret))
-            let jid = "123"
-            this.clientPool.push(new Client("nn", "ip", jid,socket))
-            return true
+        let password = message.password
+        let queryResult = await global.databaseManagement.queryUser(username)
+        if (queryResult  && queryResult.passwordhash == password) {
+            let successInfo = loginSuccess()
+            successInfo.nickname = message.nickname
+            successInfo.jid = queryResult.jid
+            this.clientPool.push(new Client(message.nickname, queryResult.jid, socket))          
+            await socket.send(JSON.stringify(successInfo))
+            this.boadrdcastPresence()
         }
         else {
             let ret = loginFailed()
             socket.send(JSON.stringify(ret))
             socket.close()
-            return false
         }
+    }
+    boadrdcastPresence() {
+        this.broadcast(JSON.stringify(this.getPresence()))
     }
     getPresence() {
         let presenceInfo = []
@@ -108,14 +125,14 @@ class ClientService {
         presenceJson.presence = presenceInfo
         return presenceJson
     }
-    getClientBySocket(socket){
-        return this.clientPool.filter(client=>{
+    getClientBySocket(socket) {
+        return this.clientPool.filter(client => {
             return client.socket == socket
         })
     }
-    getClientByJID(jid){
-        return this.clientPool.filter(client=>{
-            return client,jid == jid
+    getClientByJID(jid) {
+        return this.clientPool.filter(client => {
+            return client, jid == jid
         })
     }
     broadcast(data) {

@@ -10,6 +10,14 @@
         <el-icon>
           <User />
         </el-icon>
+        <el-input v-model="nickname" style="width: 240px" placeholder="Your nickname" />
+      </div>
+    </el-col>
+    <el-col :span="24">
+      <div class="grid-content">
+        <el-icon>
+          <User />
+        </el-icon>
         <el-input v-model="username" style="width: 240px" placeholder="Your username" />
       </div>
     </el-col>
@@ -50,10 +58,12 @@
 <script setup>
 import { protocal } from '@/utils/protocol';
 import { RSAOAEP2048 } from '@/utils/security';
-import { ElMessage} from 'element-plus';
+import CryptoJS from 'crypto-js';
+import { ElMessage } from 'element-plus';
 import { inject, ref, watch } from 'vue'
 const username = ref("")
 const password = ref("")
+const nickname = ref("")
 const serverIP = ref("10.0.0.109")
 const serverPort = ref("4567")
 const statePool = inject('statePool')
@@ -74,21 +84,21 @@ const onSubmit = () => {
     })
     let loginInfo = protocal.login()
     loginInfo.username = username.value
-    loginInfo.password = password.value
+    loginInfo.nickname = nickname.value
+    loginInfo.password = CryptoJS.MD5(password.value).toString()
     websocket.send(JSON.stringify(loginInfo))
   }
   websocket.onclose = () => {
-    ElMessage({
-      message: 'Connect failed, check address port and your network.',
-      type: 'warning',
-    })
+    statePool.state = 0
   }
   websocket.onmessage = (event) => {
     let message = JSON.parse(event.data)
     if (message.tag == "loginSuccess") {
+      myInfomation.nickname = message.nickname
+      myInfomation.jid = message.jid
       statePool.state = 2
     }
-    else { message.tag == "loginFailed" } {
+    if (message.tag == "loginFailed") {
       ElMessage({
         message: 'Login failed, check address port username password.',
         type: 'warning',
@@ -97,6 +107,37 @@ const onSubmit = () => {
   }
 }
 const onSign = () => {
+  statePool.serverIP = serverIP
+  statePool.serverPort = serverPort
+  security = new RSAOAEP2048()
+  websocket = new WebSocket("ws://" + statePool.serverIP + ":" + statePool.serverPort)
+  myInfomation.security = security
+  myInfomation.websocket = websocket
+  websocket.onopen = () => {
+    ElMessage({
+      message: 'Connected to server, start signup.',
+      type: 'success',
+    })
+    let loginInfo = protocal.signup()
+    loginInfo.username = username.value
+    loginInfo.password = CryptoJS.MD5(password.value).toString()
+    websocket.send(JSON.stringify(loginInfo))
+  }
+  websocket.onmessage = (event) => {
+    let message = JSON.parse(event.data)
+    console.log(message)
+    if (message.tag == "signupSuccess") {
+      ElMessage({
+        message: 'Signup success.',
+      })
+    }
+    else {
+      ElMessage({
+        message: 'Signup failed, check address port username password.',
+        type: 'warning',
+      })
+    }
+  }
 
 }
 const heart = ref("")
@@ -118,8 +159,15 @@ watch(() => statePool.state,
         }
       }
     }
-    else{
-      if(heart.value){
+    else {
+      if (state == 0) {
+        ElMessage({
+          message: 'Connect closed.',
+          type: 'warning',
+        })
+        statePool.isLogin = false
+      }
+      if (heart.value) {
         clearInterval(heart.value)
       }
     }

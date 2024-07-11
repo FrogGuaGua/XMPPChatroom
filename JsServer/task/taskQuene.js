@@ -15,7 +15,7 @@ class TaskQueue {
         const task = this.queue.shift();
         if(task.tag == "message"){
             if (task.to == "public") {
-                global.clientServer.pubicRoom.push(task)
+                console.log(global)
                 global.clientServer.broadcast(JSON.stringify(task))
             }
             else{

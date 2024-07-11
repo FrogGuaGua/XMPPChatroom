@@ -50,11 +50,11 @@ const statePool = reactive(
     serverIP: "",
     serverPort: "",
     state: clientState.init,
+
   });
 const myInfomation = reactive(
   {
-    nickName: "tester",
-    lastLoginTime: "000",
+    nickname: "tester",
     jid: "000",
     presence: {},
     chatlog:[],

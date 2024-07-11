@@ -1,0 +1,8 @@
+{
+    "server": [
+        {
+            "s1": ""
+        }
+    ],
+    "defaultServerPort": "5555"
+}

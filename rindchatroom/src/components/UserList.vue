@@ -1,6 +1,6 @@
 <template>
   <UserCard v-for="(user, index) in userList.userList" :key="index" :nickname="user.nickname"
-    :status="user.status" :jid="user.jid" :ip="user.ip"/>
+    :status="user.status" :jid="user.jid" />
 </template>
 
 <script setup>
@@ -10,7 +10,6 @@ const userList = defineProps({
   userList: {
     nickname:"",
     jid:"",
-    ip:"",
     status:"",
   }
 });
