@@ -1,8 +1,10 @@
 {
     "server": [
         {
-            "s1": ""
+            "domain": "s2",
+            "address":"10.0.0.109"
         }
     ],
-    "defaultServerPort": "5555"
+    "defaultServerPort": "5555",
+    "defaultDomain":"SCCS"
 }

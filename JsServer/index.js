@@ -7,4 +7,4 @@ const ServerService = require("./server/serverServer");
 global.clientServer = new ClientService()
 global.taskQueue = new TaskQueue()
 global.databaseManagement = new DatabaseManagement()
-global.ServerService = new ServerService()
+global.serverService = new ServerService()

@@ -39,7 +39,7 @@ class ClientService {
                 }
             })
         }, 5000)
-        file.saveToFile(file.toJS(this.security.publicKeyPem), "publickey.js")
+        // file.saveToFile(file.toJS(this.security.publicKeyPem), "publickey.js")
         this.server.on("connection", async (socket) => {
             socket.on('message', (message) => {
                 try {
