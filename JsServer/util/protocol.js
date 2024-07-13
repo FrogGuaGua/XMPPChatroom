@@ -3,7 +3,7 @@ class protocal{
         return {tag:"login",username:"",password:""}
     }
     static loginSuccess(){
-        return {tag:"loginSuccess",nickname:"",jid:""}
+        return {tag:"loginSuccess",nickname:"",jid:"",ip:""}
     }
     static loginFailed(){
         return {tag:"loginFailed"}
@@ -12,10 +12,10 @@ class protocal{
         return {tag:"presence",presence:[]}
     }
     static userInfo(){
-        return {nickname:"",jid:"",status:""}
+        return {nickname:"",jid:"",status:"",publickey:""}
     }
     static message(){
-        return {tag:"message",from:"",to:"",info:"",time:""}
+        return {tag:"message",from:"",to:"",info:"",time:"",type:""}
     }
     static checked(){
         return {tag:"checked"}

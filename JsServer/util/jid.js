@@ -1,14 +1,18 @@
 function parseJID(jid){
-    const pattern = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+$/;
-    const match = jid.match(pattern);
-    
-    if (match) {
-        return {
-            username: match[1],
-            domain: match[2]
-        };
+    const regex = /^([a-zA-Z0-9]+)@([a-zA-Z0-9]+)$/;
+    const match = jid.match(regex);
+    if(!match){
+      return false
+    }
+    if(match[0] != jid){
+      return false
+    }
+    if (match[0] && jid.indexOf('@') === jid.lastIndexOf('@')) {
+      const username = match[1];
+      const domain = match[2];
+      return { username, domain };
     } else {
-        return false;
+      return false; 
     }
 }
 module.exports = {parseJID};

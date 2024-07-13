@@ -1,9 +1,11 @@
+const { format } = require("node-forge/lib/util");
 const { parseJID } = require("../util/jid");
 
 class TaskQueue {
-  constructor() {
+  constructor(appHandle) {
     this.queue = [];
     this.running = false;
+    this.appHandle = appHandle
   }
   enqueue(task) {
     this.queue.push(task);
@@ -16,27 +18,27 @@ class TaskQueue {
       this.running = true;
       const task = this.queue.shift();
       if (task.tag == "message") {
+        let to = parseJID(task.to)  
         let from = parseJID(task.from)
-        let to = parseJID(task.to)
+        task.time = (new Date()).toString()
         if (task.to == "public") {
-          if (from.domain && from.domain == global.serverService.domain) {
-            global.serverService.boardcast(JSON.stringify(task))
+          if (from.domain && from.domain == this.appHandle.defaultDomainName) {
+            this.appHandle.serverService.boardcast(JSON.stringify(task))
           }
-          global.clientServer.broadcast(JSON.stringify(task))
+          this.appHandle.clientService.broadcast(JSON.stringify(task))
         }
         else {
-          if (to.domain){
-            if (to.domain == global.serverService.domain) {
-              global.clientServer.clientPool.filter(client => {
+          if (to.domain) {
+            if (to.domain == this.appHandle.defaultDomainName) {
+              this.appHandle.clientService.clientPool.filter(client => {
                 return client.jid == task.to || client.jid == task.from
               }).forEach(client => {
                 client.socket.send(JSON.stringify(task))
               })
             }
-            else{
-              global.serverService.serverPool.forEach(async server=>{
-                if(server.domain == to.domain)
-                {
+            else {
+              this.appHandle.serverService.serverPool.forEach(async server => {
+                if (server.domain == to.domain) {
                   server.send(JSON.stringify(task))
                 }
               })
