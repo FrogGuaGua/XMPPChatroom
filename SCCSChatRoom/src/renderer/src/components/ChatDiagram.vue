@@ -34,7 +34,8 @@ import { ref } from 'vue';
 import { inject } from 'vue';
 import ChatContent from "@/components/ChatContent.vue"
 import { protocal } from '@/utils/protocol';
-
+import { md, pki } from "node-forge";
+import { ElMessage } from 'element-plus'
 const myInfomation = inject('myInfomation');
 const statePool = inject('statePool')
 const userInput = ref("")
@@ -48,6 +49,25 @@ const onSend = () => {
     info.to = statePool.currentPage.jid
     info.type = "info"
     info.info = userInput.value
+    if (info.to != "public") {
+        let publickey = null
+        myInfomation.presence.forEach(user => {
+            if (user.jid == statePool.currentPage.jid) {
+                publickey = user.publickey
+            }
+        });
+        if (!publickey) {
+            return
+        } else {
+            publickey = pki.publicKeyFromPem(publickey)
+        }
+        info.info = btoa(publickey.encrypt(info.info, 'RSA-OAEP', {
+            md: md.sha256.create(),
+            mgf1: {
+                md: md.sha1.create()
+            }
+        }))
+    }
     myInfomation.websocket.send(JSON.stringify(info))
     userInput.value = ""
 }
@@ -55,6 +75,12 @@ const onSendFile = () => {
     fileInputer.value.dispatchEvent(new PointerEvent("click"))
 }
 const selectFile = async (event) => {
+    if(statePool.currentPage.jid == 'public'){
+        ElMessage.error({
+                message: 'Sharing to public is not allowed.',
+            })
+        return
+    }
     let file = event.target.files[0].path
     let info = protocal.message()
     let port = await window.api.startP2P(file)
@@ -62,8 +88,27 @@ const selectFile = async (event) => {
     info.to = statePool.currentPage.jid
     info.type = "file"
     info.info = `ws://${myInfomation.ip}:${port}`
+    if (info.to != "public") {
+        let publickey = null
+        myInfomation.presence.forEach(user => {
+            if (user.jid == statePool.currentPage.jid) {
+                publickey = user.publickey
+            }
+        });
+        if (!publickey) {
+            return
+        } else {
+            publickey = pki.publicKeyFromPem(publickey)
+        }
+        info.info = btoa(publickey.encrypt(info.info, 'RSA-OAEP', {
+            md: md.sha256.create(),
+            mgf1: {
+                md: md.sha1.create()
+            }
+        }))
+    }
     myInfomation.websocket.send(JSON.stringify(info))
-    userInput.value = ""   
+    userInput.value = ""
 }
 
 </script>

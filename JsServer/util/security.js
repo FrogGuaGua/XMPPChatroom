@@ -15,17 +15,17 @@ class RSAOAEP2048 {
 
     encrypt(data) {
         return this.publicKey.encrypt(data, 'RSA-OAEP', {
-            md: forge.md.sha256.create(),
+            md: forge.md.sha1.create(),
             mgf1: {
-                md: forge.md.sha1.create()
+                md: forge.md.sha256.create()
             }
         });
     }
     decrypt(data) {
         return this.privateKey.decrypt(data, 'RSA-OAEP', {
-            md: forge.md.sha256.create(),
+            md: forge.md.sha1.create(),
             mgf1: {
-                md: forge.md.sha1.create()
+                md: forge.md.sha256.create()
             }
         });
     }

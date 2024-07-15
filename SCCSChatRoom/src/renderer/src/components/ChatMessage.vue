@@ -29,9 +29,9 @@ const prop = defineProps({
     time: String,
     type: String
 })
+
 const p2pDownload = () => {
     if (prop.type == 'file') {
-        console.log(prop.info)
         let socket = new WebSocket(prop.info);
         socket.onmessage = (event) => {
             const blob = new Blob([event.data]);
@@ -47,7 +47,7 @@ const p2pDownload = () => {
         }
         socket.onerror = (event) => {
             ElMessage({
-                message: 'The url is not aviliable.',
+                message: 'Finished or target cancel the link.',
                 type: 'warning'
             })
             return
@@ -55,12 +55,6 @@ const p2pDownload = () => {
         socket.onopen = (event) => {
             ElMessage({
                 message: 'Start downloading.',
-            })
-            return
-        }
-        socket.onopen = (event) => {
-            ElMessage({
-                message: 'Finished or target cancel the link.',
             })
             return
         }

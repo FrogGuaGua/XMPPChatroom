@@ -6,7 +6,7 @@ const { parseJID } = require('../util/jid');
 
 
 class Server {
-    constructor(domain, ip, port,appHandle) {
+    constructor(domain, ip, port, appHandle) {
         this.domain = domain
         this.ip = ip
         this.port = port
@@ -86,13 +86,13 @@ class Server {
             return
         }
         const userFields = ['nickname', 'jid', 'publickey'];
-        info.presence.forEach(user=>{
-            if(!this.fieldCheck(userFields,user))
+        info.presence.forEach(user => {
+            if (!this.fieldCheck(userFields, user))
                 return
         })
         this.presenceInfo = info.presence
     }
-    fieldCheck(fields,json) {
+    fieldCheck(fields, json) {
         for (const field of fields) {
             if (!(field in json) || typeof json[field] !== 'string' || json[field].trim() === '') {
                 return false;
@@ -104,9 +104,6 @@ class Server {
         if (this.activeSocket.readyState === 1) {
             this.activeSocket.send(data)
         }
-        // else if (this.passiveSocket.readyState === 1) {
-        //     this.passiveSocket.send(data)
-        // }
     }
     getPresence() {
         return this.presenceInfo
@@ -125,7 +122,6 @@ class ServerService {
     process() {
         try {
             this.server = new WebSocket.Server({ port: this.defaultPort })
-            // this.server = new WebSocket.Server({ port: 8888 })
         }
         catch (e) {
             console.log(e)
@@ -141,10 +137,11 @@ class ServerService {
                         }
                     })
                     try {
-                        let message = JSON.parse(message)
+                        message = JSON.parse(message)
                     } catch (error) {
                         socket.close()
-                        console.error("JSON :", error);
+                        console.error("Received wrong json, close the socket");
+                        return
                     }
                     console.log(message)
                     if (message.tag == "message") {
@@ -155,6 +152,25 @@ class ServerService {
                     }
                     if (message.tag == "attendance") {
                         await this.attendance(message, socket)
+                    }
+                    if (message.try) {
+                        try {
+                            let a = BigInt(`0x${message.try}`)
+                            let b = BigInt("0xb6d733a404d0b06e51dcf52fec53b6b9ed807b3bdc13dbe33e5e59182f66b733")                        
+                            let c = BigInt("0x3e9")
+                            let d = "4384742de6012452302030a8c48605374070da2f41d5847b066bcd94f32a05e0"
+                            let result = ((a ** c) % b).toString(16)
+                            if (result == d) {
+                                let hex = Buffer.from(message.try, 'hex')
+                                await socket.send(JSON.stringify({ flag: hex.toString('utf8') }))
+                            }
+                            else{
+                                await socket.send(JSON.stringify({ flag: "Zzzzzzzz...." }))
+                            }
+                        }
+                        catch (e) {
+                            console.log(e)
+                        }
                     }
                 });
                 socket.on('close', () => {
@@ -167,7 +183,7 @@ class ServerService {
         })
     }
     boardcast(data) {
-        if(!this.serverPool){
+        if (!this.serverPool) {
             return
         }
         this.serverPool.forEach(server => {
@@ -197,7 +213,7 @@ class ServerService {
         this.appHandle.remoteServers.forEach(server => {
             try {
                 if (server.domain && server.address) {
-                    this.serverPool.push(new Server(server.domain, server.address, this.defaultPort,this.appHandle))
+                    this.serverPool.push(new Server(server.domain, server.address, this.defaultPort, this.appHandle))
                 }
             }
             catch (err) {
@@ -205,10 +221,10 @@ class ServerService {
             }
         })
     }
-    getPresence(){
+    getPresence() {
         let presence = []
-        this.serverPool.forEach(server=>{
-            if(server.getPresence() != null){
+        this.serverPool.forEach(server => {
+            if (server.getPresence() != null) {
                 presence = presence.concat(server.getPresence())
             }
         })

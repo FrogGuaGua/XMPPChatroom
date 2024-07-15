@@ -2,11 +2,10 @@
     "server": [
         {
             "domain": "s2",
-            "address":"10.13.84.131"
+            "address":"10.0.0.110"
         }
     ],
     "defaultServerPort": "5555",
     "defaultClientPort": "4567",
-    "defaultDomainName":"SCCS",
-    "generateNewKey":true
+    "defaultDomainName":"SCCS"
 }

@@ -55,8 +55,10 @@ class ClientService {
                     message = JSON.parse(message)
                 } catch (error) {
                     socket.close()
-                    console.error("JSON :", error);
+                    console.error("Received wrong json, close the socket");
+                    return
                 }
+                console.log(message)
                 if (message.tag == "login") {
                     this.login(message, socket,req)
                 }
@@ -114,6 +116,14 @@ class ClientService {
         let queryResult = await this.appHandle.databaseManagement.queryUser(username)
         if (queryResult && queryResult.passwordhash == password) {
             let successInfo = loginSuccess()
+            this.clientPool.forEach(client=>{
+                console.log(username)
+                if(client.jid == `${username}@${this.appHandle.defaultDomainName}`){
+                    let ret = loginFailed()
+                    socket.send(JSON.stringify(ret))
+                    socket.close()
+                }
+            })
             successInfo.nickname = message.nickname
             successInfo.jid = `${queryResult.jid}@${this.appHandle.defaultDomainName}`
             this.clientPool.push(new Client(message.nickname, `${queryResult.jid}@${this.appHandle.defaultDomainName}`, socket, message.publickey))
@@ -143,7 +153,7 @@ class ClientService {
     }
     getClientByJID(jid) {
         return this.clientPool.filter(client => {
-            return client, jid == jid
+            return client.jid == jid
         })
     }
     broadcast(data) {

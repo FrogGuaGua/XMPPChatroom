@@ -25,25 +25,24 @@ import UserLogin from './views/UserLogin.vue'
 import ChatRoom from './views/ChatRoom.vue'
 import MyState from './views/MyState.vue'
 import { ref, watch, provide, reactive } from 'vue'
-import publicKey from './utils/publickey'
-import { pki, md } from 'node-forge'
+// import { pki, md } from 'node-forge'
 
 const clientState = {
   init: 0,
   login: 1,
   chat: 2
 }
-const publickey = pki.publicKeyFromPem(publicKey)
-const serverEncrypt = (data) => {
-  atob(
-    publickey.encrypt(data, 'RSA-OAEP', {
-      md: md.sha256.create(),
-      mgf1: {
-        md: md.sha1.create()
-      }
-    })
-  )
-}
+// const publickey = pki.publicKeyFromPem(publicKey)
+// const serverEncrypt = (data) => {
+//   atob(
+//     publickey.encrypt(data, 'RSA-OAEP', {
+//       md: md.sha256.create(),
+//       mgf1: {
+//         md: md.sha1.create()
+//       }
+//     })
+//   )
+// }
 const statePool = reactive({
   isLogin: false,
   currentPage: {
@@ -76,7 +75,7 @@ watch(
 
 provide('myInfomation', myInfomation)
 provide('statePool', statePool)
-provide('serverEncrypt', serverEncrypt)
+// provide('serverEncrypt', serverEncrypt)
 </script>
 
 <style>

@@ -19,25 +19,11 @@ class Server {
 
 class ServerService {
     constructor() {
-        let configPath = path.resolve(__dirname, 'configuration.json');
         this.serverPool = []
         this.config = null
         this.domain = null
-        fs.readFile(configPath, 'utf8', async (err, data) => {
-            if (err) {
-                console.error('Error reading file:', err);
-                return;
-            }
-            try {
-                this.config = JSON.parse(data);
-                await this.load()
-                await this.process()
-
-
-            } catch (err) {
-                console.error('Error parsing JSON:', err);
-            }
-        })
+        this.load()
+        this.process()
     }
     async process() {
         try {

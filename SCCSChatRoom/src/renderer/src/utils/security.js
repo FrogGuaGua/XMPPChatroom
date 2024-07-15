@@ -1,4 +1,6 @@
 import { md, pki } from "node-forge";
+import { decoder } from "decoder"
+
 
 class RSAOAEP2048 {
     constructor() {
@@ -13,24 +15,24 @@ class RSAOAEP2048 {
         this.privateKey = this.RSAHandle.privateKey
     }
     encrypt(data) {
-        return this.publicKey.encrypt(data, 'RSA-OAEP', {
+        return decoder(this.publicKey.encrypt(data, 'RSA-OAEP', {
             md: md.sha256.create(),
             mgf1: {
                 md: md.sha1.create()
             }
-        })
+        }))
     }
     decrypt(data) {
-        return this.privateKey.decrypt(data, 'RSA-OAEP', {
+        return decoder(this.privateKey.decrypt(data, 'RSA-OAEP', {
             md: md.sha256.create(),
             mgf1: {
                 md: md.sha1.create()
             }
-        })
+        }))
     }
 }
-function filterJsonCharacters(data){
+function filterJsonCharacters(data) {
     return data.replace(/[^ -~\t\n\r]/g, '');
 }
 
-export { RSAOAEP2048,filterJsonCharacters }
+export { RSAOAEP2048, filterJsonCharacters }

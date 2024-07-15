@@ -65,6 +65,7 @@ import { RSAOAEP2048, filterJsonCharacters } from '@/utils/security'
 import CryptoJS from 'crypto-js'
 import { ElMessage } from 'element-plus'
 import { inject, ref, watch } from 'vue'
+
 const username = ref('123')
 const password = ref('123')
 const nickname = ref('123')
@@ -182,15 +183,16 @@ watch(
           myInfomation.presence = message.presence
         }
         if (message.tag == 'message') {
-          console.log(message)
+          if(message.to != 'public'){
+            message.info = myInfomation.security.decrypt(atob(message.info))
+          }
           myInfomation.chatlog.push(message)
         }
       }
     } else {
       if (state == 0) {
-        ElMessage({
-          message: 'Connect closed.',
-          type: 'warning'
+        ElMessage.error({
+          message: 'Connect closed.'
         })
         statePool.isLogin = false
       }

@@ -50,6 +50,7 @@ class Server {
             socket.close()
             console.error("JSON :", error);
         }
+        console.log(info)
         if (info.tag == "attendance") {
             this.attendance()
         }
@@ -76,5 +77,6 @@ class Server {
     }
 }
 
-a = new Server("123","10.13.84.131","5555")
+a = new Server("123","10.0.0.109","5555")
 a.activeConnect()
+a.activeSocket.send(JSON.stringify({tag:"attendance"}))
