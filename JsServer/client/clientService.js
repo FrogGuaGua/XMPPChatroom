@@ -100,7 +100,9 @@ class ClientService {
     }
     check(message, socket) {
         let client = this.getClientBySocket(socket)[0]
-        client.stack = 0
+        if(client){
+            client.stack = 0
+        }
     }
     message(message, socket) {
         let minfo = protocal.message()

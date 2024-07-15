@@ -2,7 +2,7 @@
     "server": [
         {
             "domain": "s2",
-            "address":"10.0.0.110"
+            "address":"192.168.51.96"
         }
     ],
     "defaultServerPort": "5555",

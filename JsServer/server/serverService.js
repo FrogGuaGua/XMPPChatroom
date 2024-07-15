@@ -46,7 +46,7 @@ class Server {
     attendance() {
         console.log("Server connected")
         let presence = protocal.presence()
-        presence.presence = this.appHandle.clientServer.getPresence()
+        presence.presence = this.appHandle.clientService.getPresence()
         presence = JSON.stringify(presence)
         this.send(presence)
     }
@@ -204,7 +204,7 @@ class ServerService {
         socket.send(JSON.stringify(protocal.checked()))
     }
     async attendance(message, socket) {
-        let presence = this.appHandle.clientServer.getPresence()
+        let presence = this.appHandle.clientService.getPresence()
         socket.send(JSON.stringify(presence))
     }
     load() {
