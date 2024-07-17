@@ -2,19 +2,21 @@
   <el-row :gutter="24">
     <el-col>
       <div class="grid-content">
-        <h2>RindChatroom</h2>
+        <h2>SCCSChatroom</h2>
       </div>
     </el-col>
     <el-col :span="24">
+      <el-text>Your nickname(Optional)</el-text>
       <div class="grid-content">
         <el-icon>
           <User />
         </el-icon>
-        <el-input v-model="nickname" style="width: 240px" placeholder="Your nickname"
+        <el-input v-model="nickname" style="width: 240px" placeholder="Your nickname(Optional)"
           :formatter="(value) => `${value}`.replace(/[^0-9A-Za-z !#-~\t\n\r]/g, '')" />
       </div>
     </el-col>
     <el-col :span="24">
+      <el-text>Your username</el-text>
       <div class="grid-content">
         <el-icon>
           <User />
@@ -24,6 +26,7 @@
       </div>
     </el-col>
     <el-col :span="24">
+      <el-text>Your password</el-text>
       <div class="grid-content">
         <el-icon>
           <Lock />
@@ -32,6 +35,7 @@
       </div>
     </el-col>
     <el-col :span="24">
+      <el-text>Server IP</el-text>
       <div class="grid-content">
         <el-icon>
           <Lock />
@@ -41,6 +45,7 @@
       </div>
     </el-col>
     <el-col :span="24">
+      <el-text>Server Port</el-text>
       <div class="grid-content">
         <el-icon>
           <Lock />
@@ -50,11 +55,11 @@
       </div>
     </el-col>
     <el-col>
-      <el-button type="primary" @click="onSubmit()">submit</el-button>
+      <el-button type="primary" @click="onSubmit()">Log in</el-button>
       <el-button type="primary" @click="onSign()">Sign up</el-button>
     </el-col>
     <el-col>
-      <h4>NameHere</h4>
+      <h4>SCCS</h4>
     </el-col>
   </el-row>
 </template>
@@ -183,7 +188,7 @@ watch(
           myInfomation.presence = message.presence
         }
         if (message.tag == 'message') {
-          if(message.to != 'public'){
+          if (message.to != 'public') {
             message.info = myInfomation.security.decrypt(atob(message.info))
           }
           myInfomation.chatlog.push(message)

@@ -23,6 +23,10 @@ class Application {
                 this.defaultServerPort = this.config.defaultServerPort
                 this.defaultClientPort = this.config.defaultClientPort
                 this.defaultDomainName = this.config.defaultDomainName
+                if(await this.configCheck()){
+                    console.error('Check your config , make the domain names and the IP(including your self) is unique')
+                    return
+                }
                 await this.load()
             } catch (err) {
                 console.error('Error parsing JSON:', err);
@@ -51,6 +55,23 @@ class Application {
         let data = protocal.presence()
         data.presence = this.getTotalPresence()
         this.clientService.broadcast(JSON.stringify(data))
+    }
+    async configCheck(){
+        let domainName= []
+        let doaminIP = []
+        this.config.server.forEach(server=> {
+            domainName.push(server.domain)
+            doaminIP.push(server.address)
+        });
+        domainName.push(this.defaultDomainName)
+        // domainnames or ips are not unique
+        if(domainName.length !== (new Set(domainName)).size ){
+            return true
+        }
+        if(doaminIP.length !== (new Set(doaminIP)).size ){
+            return true
+        }
+        return false
     }
 }
 

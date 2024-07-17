@@ -43,7 +43,7 @@ class Server {
         console.error("Remote server is not online")
         this.reconnect()
     }
-    attendance() {
+    attendance(event) {
         console.log("Server connected")
         let presence = protocal.presence()
         presence.presence = this.appHandle.clientService.getPresence()
@@ -56,11 +56,13 @@ class Server {
         this.appHandle.boardcastTotalPresence()
     }
     process(event) {
+        console.log('WebSocket message received:', event.data);
+        let info = null
         try {
-            let info = JSON.parse(event.data)
+            info = JSON.parse(event.data)
         } catch (error) {
             socket.close()
-            console.error("JSON :", error);
+            console.error("JSON error in server to server");
         }
         if (!info.tag) {
             return
@@ -92,6 +94,7 @@ class Server {
         })
         this.presenceInfo = info.presence
     }
+    // check the field for json
     fieldCheck(fields, json) {
         for (const field of fields) {
             if (!(field in json) || typeof json[field] !== 'string' || json[field].trim() === '') {
@@ -114,8 +117,6 @@ class ServerService {
     constructor(appHandle) {
         this.appHandle = appHandle
         this.serverPool = []
-        this.config = null
-        this.domain = null
         this.load()
         this.process()
     }
@@ -129,13 +130,21 @@ class ServerService {
         if (this.server) {
             this.server.on("connection", (socket, req) => {
                 socket.on('message', async (message) => {
-                    const ip = req.socket.remoteAddress;
-                    const port = req.socket.remotePort;
+                    let ip = req.socket.remoteAddress;
+                    if(ip.startsWith('::ffff:')){
+                        ip = ip.split(':').pop()
+                    }
+                    let flag = true
                     this.serverPool.forEach(server => {
-                        if (ip == server.ip && port == server.port) {
+                        if (ip == server.ip) {
                             server.socket = socket
+                            flag = false
                         }
                     })
+                    if(flag){
+                        socket.close()
+                        console.log("Wrang ip conncected in, kick out")
+                    }
                     try {
                         message = JSON.parse(message)
                     } catch (error) {
@@ -143,7 +152,7 @@ class ServerService {
                         console.error("Received wrong json, close the socket");
                         return
                     }
-                    console.log(message)
+    
                     if (message.tag == "message") {
                         await this.message(message, socket)
                     }
@@ -152,6 +161,9 @@ class ServerService {
                     }
                     if (message.tag == "attendance") {
                         await this.attendance(message, socket)
+                    }
+                    if (message.tag == "presence"){
+                        await this.presence(message,socket,ip)
                     }
                     if (message.try) {
                         try {
@@ -169,7 +181,7 @@ class ServerService {
                             }
                         }
                         catch (e) {
-                            console.log(e)
+                            console.log("message try not true")
                         }
                     }
                 });
@@ -206,6 +218,15 @@ class ServerService {
     async attendance(message, socket) {
         let presence = this.appHandle.clientService.getPresence()
         socket.send(JSON.stringify(presence))
+    }
+    async presence(message,socket,ip){
+        this.serverPool.forEach(server=>{
+            if(server.ip == ip){
+                console.log(message.presence)
+                server.presenceInfo = message.presence
+            }
+        })
+        this.appHandle.boardcastTotalPresence()
     }
     load() {
         this.defaultPort = this.appHandle.defaultServerPort

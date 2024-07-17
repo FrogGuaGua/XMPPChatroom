@@ -1,7 +1,6 @@
 const WebSocket = require("ws");
 const { loginSuccess, loginFailed, userInfo, presence } = require("../util/protocol");
 const protocal = require("../util/protocol");
-const { } = require("node-forge/lib/pki");
 const { publicKeyFromPem } = require("node-forge/lib/x509");
 const port = 4567
 
@@ -58,7 +57,6 @@ class ClientService {
                     console.error("Received wrong json, close the socket");
                     return
                 }
-                console.log(message)
                 if (message.tag == "login") {
                     this.login(message, socket,req)
                 }
@@ -74,7 +72,6 @@ class ClientService {
                 if (message.tag == "check") {
                     this.check(message, socket)
                 }
-                console.log(message)
 
             });
             socket.on('close', () => {

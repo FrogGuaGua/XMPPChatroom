@@ -5,6 +5,9 @@ class protocal {
     static message() {
         return { tag: "message", from: "", to: "", type: "", info: "" }
     }
+    static file() {
+        return { tag: "file", from: "", to: "", info: "" }
+    }
     static check() {
         return { tag: "check" }
     }
