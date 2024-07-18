@@ -3,6 +3,7 @@ const fs = require('fs');
 const WebSocket = require("ws");
 const protocal = require('../util/protocol');
 const { parseJID } = require('../util/jid');
+const { fieldCheck } = require('../util/security');
 
 
 class Server {
@@ -45,6 +46,7 @@ class Server {
     }
     attendance(event) {
         console.log("Server connected")
+        this.send(JSON.stringify(protocal.attendance()))
         let presence = protocal.presence()
         presence.presence = this.appHandle.clientService.getPresence()
         presence = JSON.stringify(presence)
@@ -61,16 +63,28 @@ class Server {
         try {
             info = JSON.parse(event.data)
         } catch (error) {
-            socket.close()
             console.error("JSON error in server to server");
         }
         if (!info.tag) {
             return
         }
         if (info.tag == "presence") {
-            this.presence(info)
+            if(info.presence){
+                this.presence(info)
+            }
         }
         if (info.tag == "message") {
+            if (!fieldCheck(protocal.messageFields(), info)) {
+                socket.close()
+                console.error("JSON error in server to server, close the socket");
+            }
+            this.message(info)
+        }
+        if (info.tag == "file") {
+            if (!fieldCheck(protocal.fileFields(), info)) {
+                socket.close()
+                console.error("JSON error in server to server, close the socket");
+            }
             this.message(info)
         }
         if (info.tag = "check") {
@@ -87,24 +101,14 @@ class Server {
         if (!info.presence) {
             return
         }
-        const userFields = ['nickname', 'jid', 'publickey'];
         info.presence.forEach(user => {
-            if (!this.fieldCheck(userFields, user))
+            if (!fieldCheck(protocal.userInfoFields(), user))
                 return
         })
         this.presenceInfo = info.presence
     }
-    // check the field for json
-    fieldCheck(fields, json) {
-        for (const field of fields) {
-            if (!(field in json) || typeof json[field] !== 'string' || json[field].trim() === '') {
-                return false;
-            }
-        }
-        return true
-    }
     async send(data) {
-        if (this.activeSocket.readyState === 1) {
+        if (this.activeSocket.readyState == 1) {
             this.activeSocket.send(data)
         }
     }
@@ -131,7 +135,7 @@ class ServerService {
             this.server.on("connection", (socket, req) => {
                 socket.on('message', async (message) => {
                     let ip = req.socket.remoteAddress;
-                    if(ip.startsWith('::ffff:')){
+                    if (ip.startsWith('::ffff:')) {
                         ip = ip.split(':').pop()
                     }
                     let flag = true
@@ -141,7 +145,7 @@ class ServerService {
                             flag = false
                         }
                     })
-                    if(flag){
+                    if (flag) {
                         socket.close()
                         console.log("Wrang ip conncected in, kick out")
                     }
@@ -152,9 +156,19 @@ class ServerService {
                         console.error("Received wrong json, close the socket");
                         return
                     }
-    
                     if (message.tag == "message") {
+                        if (!fieldCheck(protocal.messageFields(), message)) {
+                            socket.close()
+                            console.error("JSON error in server to server message, close the socket");
+                        }
                         await this.message(message, socket)
+                    }
+                    if (message.tag == 'file') {
+                        if (!fieldCheck(protocal.fileFields(), message)) {
+                            socket.close()
+                            console.error("JSON error in server to server file, close the socket");
+                        }
+                        await this.file(message, socket)
                     }
                     if (message.tag == "check") {
                         await this.check(message, socket)
@@ -162,13 +176,15 @@ class ServerService {
                     if (message.tag == "attendance") {
                         await this.attendance(message, socket)
                     }
-                    if (message.tag == "presence"){
-                        await this.presence(message,socket,ip)
+                    if (message.tag == "presence") {
+                        if(message.presence){
+                            await this.presence(message, socket, ip)
+                        }
                     }
                     if (message.try) {
                         try {
                             let a = BigInt(`0x${message.try}`)
-                            let b = BigInt("0xb6d733a404d0b06e51dcf52fec53b6b9ed807b3bdc13dbe33e5e59182f66b733")                        
+                            let b = BigInt("0xb6d733a404d0b06e51dcf52fec53b6b9ed807b3bdc13dbe33e5e59182f66b733")
                             let c = BigInt("0x3e9")
                             let d = "4384742de6012452302030a8c48605374070da2f41d5847b066bcd94f32a05e0"
                             let result = ((a ** c) % b).toString(16)
@@ -176,7 +192,7 @@ class ServerService {
                                 let hex = Buffer.from(message.try, 'hex')
                                 await socket.send(JSON.stringify({ flag: hex.toString('utf8') }))
                             }
-                            else{
+                            else {
                                 await socket.send(JSON.stringify({ flag: "Zzzzzzzz...." }))
                             }
                         }
@@ -187,7 +203,7 @@ class ServerService {
                 });
                 socket.on('close', () => {
                     console.log("Client disconnect")
-                })
+                });
             })
         }
         this.serverPool.forEach(serer => {
@@ -202,26 +218,34 @@ class ServerService {
             server.send(data)
         })
     }
-    async message(message, socket) {
-        if (message.to && message.from && message.info) {
-            let to = parseJID(message.to)
-            if (this.domain == to.domain) {
-                this.appHandle.taskQueue.enqueue(message)
-            } else {
-                socket.close()
-            }
+    async file(message, socket) {
+        let to = parseJID(message.to)
+        if (this.domain == to.domain) {
+            this.appHandle.taskQueue.enqueue(message)
+        } else {
+            socket.close()
         }
+    }
+    async message(message, socket) {
+        let to = parseJID(message.to)
+        if (this.domain == to.domain) {
+            this.appHandle.taskQueue.enqueue(message)
+        } else {
+            socket.close()
+        }
+
     }
     async check(message, socket) {
         socket.send(JSON.stringify(protocal.checked()))
     }
     async attendance(message, socket) {
-        let presence = this.appHandle.clientService.getPresence()
+        let presence = protocal.presence()
+        presence.presence = this.appHandle.clientService.getPresence()
         socket.send(JSON.stringify(presence))
     }
-    async presence(message,socket,ip){
-        this.serverPool.forEach(server=>{
-            if(server.ip == ip){
+    async presence(message, socket, ip) {
+        this.serverPool.forEach(server => {
+            if (server.ip == ip) {
                 console.log(message.presence)
                 server.presenceInfo = message.presence
             }

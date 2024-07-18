@@ -7,6 +7,6 @@
 </template>
 <script setup>
 import { inject } from 'vue'
-
+// Display user info
 const myInfomation = inject('myInfomation')
 </script>

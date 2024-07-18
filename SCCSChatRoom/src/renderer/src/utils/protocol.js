@@ -6,7 +6,7 @@ class protocal {
         return { tag: "message", from: "", to: "", type: "", info: "" }
     }
     static file() {
-        return { tag: "file", from: "", to: "", info: "" }
+        return { tag: "file", filename:"", from: "", to: "", info: "" }
     }
     static check() {
         return { tag: "check" }
@@ -26,6 +26,7 @@ class protocal {
     static signupFail(){
         return {tag:"signupFail"}
     }
+    
 }
 
 export { protocal }

@@ -12,7 +12,7 @@
           <User />
         </el-icon>
         <el-input v-model="nickname" style="width: 240px" placeholder="Your nickname(Optional)"
-          :formatter="(value) => `${value}`.replace(/[^0-9A-Za-z !#-~\t\n\r]/g, '')" />
+          :formatter="(value) => `${value}`.replace(/[^0-9A-Za-z]/g, '')" />
       </div>
     </el-col>
     <el-col :span="24">
@@ -22,7 +22,7 @@
           <User />
         </el-icon>
         <el-input v-model="username" style="width: 240px" placeholder="Your username"
-          :formatter="(value) => `${value}`.replace(/[^0-9A-Za-z !#-~\t\n\r]/g, '')" />
+          :formatter="(value) => `${value}`.replace(/[^0-9A-Za-z]/g, '')" />
       </div>
     </el-col>
     <el-col :span="24">
@@ -70,10 +70,11 @@ import { RSAOAEP2048, filterJsonCharacters } from '@/utils/security'
 import CryptoJS from 'crypto-js'
 import { ElMessage } from 'element-plus'
 import { inject, ref, watch } from 'vue'
+import { sliceStr } from '../utils/security'
 
-const username = ref('123')
+const username = ref('12312312')
 const password = ref('123')
-const nickname = ref('123')
+const nickname = ref('12312312')
 const serverIP = ref('10.0.0.109')
 const serverPort = ref('4567')
 const statePool = inject('statePool')
@@ -91,6 +92,13 @@ const parseIP = (value) => {
   return validParts.join('.');
 };
 const onSubmit = () => {
+  if (username.value.length < 8) {
+    ElMessage({
+      message: 'The length of username are at least 8.',
+      type: 'warning'
+    })
+    return
+  }
   if (!username.value || !password.value || !nickname.value || username.value == "public") {
     ElMessage({
       message: 'Login failed, check address port username password.',
@@ -136,6 +144,13 @@ const onSubmit = () => {
   }
 }
 const onSign = () => {
+  if (username.value.length < 8) {
+    ElMessage({
+      message: 'The length of username are at least 8.',
+      type: 'warning'
+    })
+    return
+  }
   if (!username.value || !password.value || username.value == "public") {
     ElMessage({
       message: 'Signup failed, check address port username password.',
@@ -187,9 +202,14 @@ watch(
         if (message.tag == 'presence') {
           myInfomation.presence = message.presence
         }
-        if (message.tag == 'message') {
+        if (message.tag == 'message' || message.tag == 'file') {
           if (message.to != 'public') {
-            message.info = myInfomation.security.decrypt(atob(message.info))
+            let slicedInfo = sliceStr(atob(message.info),256)
+            let currentinfo = ""
+            slicedInfo.forEach(str=>{
+              currentinfo += myInfomation.security.decrypt(str)
+            })
+            message.info = currentinfo 
           }
           myInfomation.chatlog.push(message)
         }

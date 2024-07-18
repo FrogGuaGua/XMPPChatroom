@@ -31,5 +31,12 @@ class RSAOAEP2048 {
     }
 
 }
-
-module.exports = RSAOAEP2048;
+function fieldCheck(fields, json) {
+    for (const field of fields) {
+        if (!(field in json) || typeof json[field] !== 'string' || json[field].trim() === '') {
+            return false;
+        }
+    }
+    return true
+}
+module.exports = { RSAOAEP2048, fieldCheck };

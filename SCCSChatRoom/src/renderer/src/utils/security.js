@@ -1,4 +1,4 @@
-import { md, pki } from "node-forge";
+import { md, pki} from "node-forge";
 import { decoder } from "decoder"
 
 
@@ -34,5 +34,20 @@ class RSAOAEP2048 {
 function filterJsonCharacters(data) {
     return data.replace(/[^ -~\t\n\r]/g, '');
 }
+function sliceStr(str,num){
+    let result = []
+    let buff = ""
+    if(str.length<=num){
+        return [str]
+    }
+    for (let i = 0; i < str.length; i++) {
+        if(i != 0 && i % num == 0){
+            result.push(buff)
+            buff = ""
+        }
+        buff+=str[i]
+    }
+    return result;
+}
 
-export { RSAOAEP2048, filterJsonCharacters }
+export { RSAOAEP2048, filterJsonCharacters,sliceStr }

@@ -1,6 +1,6 @@
 <template>
-  <UserCard v-for="(user, index) in userList.userList" :key="index" :nickname="user.nickname"
-    :status="user.status" :jid="user.jid" />
+  <!-- Iterate over each user object in the userList.userList array, generating multiple UserCard component instances -->
+  <UserCard v-for="(user, index) in userList.userList" :key="index" :nickname="user.nickname" :jid="user.jid" />
 </template>
 
 <script setup>
@@ -10,7 +10,6 @@ const userList = defineProps({
   userList: {
     nickname:"",
     jid:"",
-    status:"",
   }
 });
 </script>

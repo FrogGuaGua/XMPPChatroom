@@ -1,11 +1,11 @@
 {
     "server": [
         {
-            "domain": "s2",
-            "address":"192.168.232.128"
+            "domain": "s4",
+            "address":"10.13.91.51"
         }
     ],
     "defaultServerPort": "5555",
     "defaultClientPort": "4567",
-    "defaultDomainName":"SCCS"
+    "defaultDomainName":"s1"
 }

@@ -35,7 +35,8 @@ import { inject } from 'vue';
 import ChatContent from "@/components/ChatContent.vue"
 import { protocal } from '@/utils/protocol';
 import { md, pki } from "node-forge";
-import { ElMessage } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { sliceStr } from '../utils/security';
 const myInfomation = inject('myInfomation');
 const statePool = inject('statePool')
 const userInput = ref("")
@@ -48,7 +49,7 @@ const onSend = () => {
     info.from = myInfomation.jid
     info.to = statePool.currentPage.jid
     info.type = "info"
-    info.info = userInput.value
+    let slicedInfo = sliceStr(userInput.value,190)
     if (info.to != "public") {
         let publickey = null
         myInfomation.presence.forEach(user => {
@@ -61,13 +62,16 @@ const onSend = () => {
         } else {
             publickey = pki.publicKeyFromPem(publickey)
         }
-        info.info = btoa(publickey.encrypt(info.info, 'RSA-OAEP', {
-            md: md.sha256.create(),
-            mgf1: {
-                md: md.sha1.create()
-            }
-        }))
+        slicedInfo.forEach((str) => {
+            info.info += publickey.encrypt(str, 'RSA-OAEP', {
+                md: md.sha256.create(),
+                mgf1: {
+                    md: md.sha1.create()
+                }
+            })
+        })
     }
+    info.info = btoa(info.info)
     myInfomation.websocket.send(JSON.stringify(info))
     userInput.value = ""
 }
@@ -75,20 +79,26 @@ const onSendFile = () => {
     fileInputer.value.dispatchEvent(new PointerEvent("click"))
 }
 const selectFile = async (event) => {
-    if(statePool.currentPage.jid == 'public'){
-        ElMessage.error({
-                message: 'Sharing to public is not allowed.',
-            })
+    if (event.target.files[0].size >= 10240) {
+        ElMessageBox.alert('File size>10 kb is not allowed', 'P2P policy', {
+            confirmButtonText: 'OK',
+        })
         return
     }
-    let file = event.target.files[0].path
-    let info = protocal.message()
-    let port = await window.api.startP2P(file)
-    info.from = myInfomation.jid
-    info.to = statePool.currentPage.jid
-    info.type = "file"
-    info.info = `ws://${myInfomation.ip}:${port}`
-    if (info.to != "public") {
+    if (statePool.currentPage.jid == 'public') {
+        ElMessageBox.alert('File to public room is not allowed', 'P2P policy', {
+            confirmButtonText: 'OK',
+        })
+        return
+    }
+    let file = event.target.files[0]
+    const filereader = new FileReader()
+    filereader.onload = (e) => {
+        let info = protocal.file()
+        info.from = myInfomation.jid
+        info.to = statePool.currentPage.jid
+        info.filename = file.name
+        info.info = new TextDecoder('utf-8').decode(new Uint8Array(e.target.result).buffer);
         let publickey = null
         myInfomation.presence.forEach(user => {
             if (user.jid == statePool.currentPage.jid) {
@@ -100,15 +110,20 @@ const selectFile = async (event) => {
         } else {
             publickey = pki.publicKeyFromPem(publickey)
         }
-        info.info = btoa(publickey.encrypt(info.info, 'RSA-OAEP', {
+        let slicedInfo = sliceStr(info.info,190)
+        let currentByte = ""
+        slicedInfo.forEach((str)=>{
+            currentByte += publickey.encrypt(str, 'RSA-OAEP', {
             md: md.sha256.create(),
             mgf1: {
                 md: md.sha1.create()
             }
-        }))
+        })
+        })
+        info.info=btoa(currentByte)
+        myInfomation.websocket.send(JSON.stringify(info))
     }
-    myInfomation.websocket.send(JSON.stringify(info))
-    userInput.value = ""
+    filereader.readAsArrayBuffer(file)
 }
 
 </script>

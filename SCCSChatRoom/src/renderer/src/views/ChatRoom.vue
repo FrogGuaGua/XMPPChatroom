@@ -22,18 +22,19 @@ import UserList from '@/components/UserList.vue'
 import PublicRoom from '@/components/PublicRoom.vue'
 import ChatDiagram from '@/components/ChatDiagram.vue'
 import { inject, ref } from 'vue'
-
+// Control the size of chatroom
 const pageHeight = ref(document.documentElement.clientHeight)
 const userListHeight = () => {
   return 'height: ' + pageHeight.value * 0.81 + 'px'
 }
-
+// Public room info
 const publicRoom = {
   nickname: 'PublicRoom',
   jid: 'public',
   status: '',
   ip: ''
 }
+// Inject global info for userlist.vue
 const myInfo = inject('myInfomation')
 </script>
 

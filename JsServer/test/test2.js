@@ -19,7 +19,7 @@ class Server {
             clearTimeout(this.reconnectTimeout);
             this.reconnectTimeout = null;
         }
-        this.activeSocket = new WebSocket.WebSocket(`ws://${this.ip}:${this.port}`)
+        this.activeSocket = new WebSocket.WebSocket(`ws://10.13.91.51:5555`)
         this.activeSocket.onopen = this.attendance.bind(this)
         this.activeSocket.onclose = this.close.bind(this)
         this.activeSocket.onmessage = this.message.bind(this)

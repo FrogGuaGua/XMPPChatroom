@@ -2,13 +2,13 @@ const WebSocket = require("ws");
 const { loginSuccess, loginFailed, userInfo, presence } = require("../util/protocol");
 const protocal = require("../util/protocol");
 const { publicKeyFromPem } = require("node-forge/lib/x509");
+const { fieldCheck } = require("../util/security");
 const port = 4567
 
 class Client {
     constructor(nickname, jid, socket, publickey) {
         this.nickname = nickname
         this.jid = jid
-        this.status = "online"
         this.socket = socket
         this.stack = 0
         this.publickey = publickey
@@ -19,7 +19,6 @@ class Client {
         info.jid = this.jid
         info.nickname = this.nickname
         info.publickey = this.publickey
-        info.status = this.status
         return info
     }
     encrypt(data) {
@@ -57,17 +56,34 @@ class ClientService {
                     console.error("Received wrong json, close the socket");
                     return
                 }
+                // console.log(message)
                 if (message.tag == "login") {
+                    if(!fieldCheck(protocal.loginFields(),message)){
+                        socket.close()
+                        console.error("Invalid JSON received, close the socket");
+                    }
                     this.login(message, socket,req)
                 }
                 if (message.tag == "signup") {
+                    if(!fieldCheck(protocal.signupFields(),message)){
+                        socket.close()
+                        console.error("Invalid JSON received, close the socket");
+                    }
                     this.signup(message, socket)
                 }
                 if (message.tag == "message") {
-                    let index = this.clientPool.findIndex((client) => { client == socket })
-                    if (index) {
-                        this.message(message, socket)
+                    if(!fieldCheck(protocal.messageFields(),message)){
+                        socket.close()
+                        console.error("Invalid JSON received, close the socket");
                     }
+                    this.message(message, socket)
+                }
+                if (message.tag == "file") {
+                    if(!fieldCheck(protocal.fileFields(),message)){
+                        socket.close()
+                        console.error("Invalid JSON received, close the socket");
+                    }
+                    this.file(message, socket)
                 }
                 if (message.tag == "check") {
                     this.check(message, socket)
@@ -101,12 +117,19 @@ class ClientService {
             client.stack = 0
         }
     }
+    file(message, socket){
+        let minfo = protocal.file()
+        minfo.from = message.from
+        minfo.to = message.to
+        minfo.info = message.info
+        minfo.filename = message.filename
+        this.appHandle.taskQueue.enqueue(minfo)
+    }
     message(message, socket) {
         let minfo = protocal.message()
         minfo.from = message.from
         minfo.to = message.to
         minfo.info = message.info
-        minfo.type = message.type
         this.appHandle.taskQueue.enqueue(minfo)
     }
     async login(message, socket,req) {

@@ -4,7 +4,7 @@ const DatabaseManagement = require("./database/database");
 const ServerService = require("./server/serverService");
 const path = require('path');
 const fs = require('fs');
-const RSAOAEP2048 = require("./util/security");
+const {RSAOAEP2048} = require("./util/security");
 const protocal = require("./util/protocol");
 
 

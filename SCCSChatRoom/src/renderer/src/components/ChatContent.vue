@@ -1,7 +1,7 @@
 <template>
     <div :style="userListHeight()" class="user-contect">
-        <ChatMessage v-for="(value, index) in getCurrentChat()" :key="index" :from="value.from" :to="value.to"
-            :info="value.info" :time="value.time" :type="value.type">
+        <ChatMessage v-for="(value, index) in getCurrentChat()" :key="index" :tag="value.tag" :from="value.from" :to="value.to"
+            :info="value.info" :time="value.time" :filename="value.filename">
         </ChatMessage>
     </div>
 </template>

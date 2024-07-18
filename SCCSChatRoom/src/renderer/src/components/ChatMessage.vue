@@ -10,62 +10,42 @@
             <el-text size="small" type="info">{{ prop.time }}</el-text>
         </el-col>
         <el-col :span="24">
-            <el-button size="large" round @click="p2pDownload()">
-                <el-icon v-if="prop.type == 'file'">
+            <el-button size="large" round @click="download()">
+                <el-icon v-if="prop.tag == 'file'">
                     <Folder />
                 </el-icon>
-                <el-text>{{ prop.info }}</el-text>
+                <el-text v-if="prop.tag == 'message'">{{ prop.info }}</el-text>
+                <el-text v-if="prop.tag == 'file'">{{ prop.filename }}</el-text>
             </el-button>
         </el-col>
     </el-row>
 </template>
 <script setup>
 import { defineProps, } from 'vue';
-import { ElMessage } from 'element-plus'
+// Data from Chat diagram
 const prop = defineProps({
+    tag: String,
     from: String,
     to: String,
     info: String,
+    filename: String,
     time: String,
-    type: String
 })
-
-const p2pDownload = () => {
-    if (prop.type == 'file') {
-        let socket = new WebSocket(prop.info);
-        socket.onmessage = (event) => {
-            const blob = new Blob([event.data]);
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'rename.safe';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            socket.close();
-        }
-        socket.onerror = (event) => {
-            ElMessage({
-                message: 'Finished or target cancel the link.',
-                type: 'warning'
-            })
-            return
-        }
-        socket.onopen = (event) => {
-            ElMessage({
-                message: 'Start downloading.',
-            })
-            return
-        }
+// Implementing for peer to peer down load
+const download = () => {
+    if (prop.tag == 'file') {
+        const blob = new Blob([prop.info]);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = prop.filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
     }
     else {
         return
     }
 }
-
-
-
-
-
 </script>

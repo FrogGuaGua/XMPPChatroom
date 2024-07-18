@@ -25,36 +25,39 @@ import UserLogin from './views/UserLogin.vue'
 import ChatRoom from './views/ChatRoom.vue'
 import MyState from './views/MyState.vue'
 import { ref, watch, provide, reactive } from 'vue'
-
+// Client State
+// Control the diagram showing
 const clientState = {
   init: 0,
   login: 1,
   chat: 2
 }
-
+// Global info
 const statePool = reactive({
-  isLogin: false,
-  currentPage: {
-    nickname: String,
-    jid: String,
-    status: String,
-    ip: String
+  isLogin: false,   // Control the login diagram 
+                    
+  currentPage: {    // Control the message shown and chat target
+    nickname: String,   // nickname
+    jid: String,        // jid
   },
-  serverIP: '',
-  serverPort: '',
-  state: clientState.init
+  serverIP: '',     // server ip
+  serverPort: '',   // server port
+  state: clientState.init  // Client State
 })
-
+// Global user info 
 const myInfomation = reactive({
-  nickname: 'tester',
-  jid: '000',
-  presence: {},
-  chatlog: [],
-  websocket: '',
-  security: '',
-  ip:'127.0.0.1',
+  nickname: 'tester',   // my nickname
+  jid: '000',    // my jid
+  presence: {},   // all presence
+                  //used to show chatlist
+  chatlog: [],    // all chat message
+  websocket: '',  // the connection to server
+  security: '',   // RSA2048OAEP
+  ip:'127.0.0.1',  // my ip
 })
 
+
+// Implementing changes to the login window display
 const loginVisible = ref(true)
 watch(
   () => statePool.isLogin,
@@ -62,7 +65,7 @@ watch(
     loginVisible.value = !isLogin
   }
 )
-
+// Implementing global info for components
 provide('myInfomation', myInfomation)
 provide('statePool', statePool)
 </script>

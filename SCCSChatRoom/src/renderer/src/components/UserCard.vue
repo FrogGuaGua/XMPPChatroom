@@ -1,13 +1,8 @@
 <template>
     <el-card @click="readMessage" shadow="hover" :class="messageBlink()">
-        <template #header>
-            <div style="display: flex; justify-content: space-between;">
-                <el-text size="large">{{ user.nickname }}</el-text>
-                <el-text type="info">{{ user.jid }}</el-text>
-            </div>
-        </template>
-        <div class="status-container" style="display: flex; justify-content: space-between;" >
-            <el-text>{{ user.status }}</el-text>
+        <div style="display: flex; justify-content: space-between;">
+            <el-text size="large">{{ user.nickname }}</el-text>
+            <el-text type="info">{{ user.jid }}</el-text>
         </div>
     </el-card>
 </template>
@@ -20,7 +15,6 @@ const user = defineProps(
     {
         nickname: String,
         jid: String,
-        status: String,
     })
 const hasNewMessage = ref(false)
 const messageBlink = () => {
@@ -29,7 +23,7 @@ const messageBlink = () => {
 const statePool = inject("statePool")
 const readMessage = () => {
     hasNewMessage.value = false
-    statePool.currentPage = {nickname:user.nickname,jid:user.jid,status:user.status,ip:user.ip}
+    statePool.currentPage = { nickname: user.nickname, jid: user.jid, status: user.status, ip: user.ip }
 }
 </script>
 
@@ -51,8 +45,9 @@ const readMessage = () => {
 .blinking-green {
     animation: blink 1s infinite;
 }
-.status-container {
-    padding: 4px; 
-    margin: 0;   
-  }
+
+.jid-container {
+    padding: 4px;
+    margin: 0;
+}
 </style>

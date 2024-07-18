@@ -17,7 +17,8 @@ class TaskQueue {
     if (this.queue.length > 0) {
       this.running = true;
       const task = this.queue.shift();
-      if (task.tag == "message") {
+      console.log(task)
+      if (task.tag == "message" || task.tag == "file") {
         let to = parseJID(task.to)  
         let from = parseJID(task.from)
         task.time = (new Date()).toString()
