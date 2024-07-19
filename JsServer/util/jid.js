@@ -1,3 +1,5 @@
+// Code to parse JID
+// c1@s1 to [c1,s1]
 function parseJID(jid){
     const regex = /^([a-zA-Z0-9]+)@([a-zA-Z0-9]+)$/;
     const match = jid.match(regex);

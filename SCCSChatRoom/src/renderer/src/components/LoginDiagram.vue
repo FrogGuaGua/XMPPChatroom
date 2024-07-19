@@ -75,7 +75,7 @@ import { sliceStr } from '../utils/security'
 const username = ref('12312312')
 const password = ref('123')
 const nickname = ref('12312312')
-const serverIP = ref('10.0.0.109')
+const serverIP = ref('10.13.84.131')
 const serverPort = ref('4567')
 const statePool = inject('statePool')
 const myInfomation = inject('myInfomation')

@@ -1,4 +1,7 @@
+// all protocal used
+// including the field check 
 class protocal{
+    // login
     static login(){
         return {tag:"login",username:"",password:""}
     }
@@ -11,6 +14,7 @@ class protocal{
     static loginFailed(){
         return {tag:"loginFailed"}
     }
+    //presence
     static presence(){
         return {tag:"presence",presence:[]}
     }
@@ -23,24 +27,28 @@ class protocal{
     static userInfoFields(){
         return ["nickname","jid","publickey"]
     }
+    // message
     static message(){
         return {tag:"message",from:"",to:"",info:"",time:""}
     }
     static messageFields(){
         return ["from","to","info"]
     }
+    // file
     static file(){
         return {tag:"file",from:"",to:"",info:"",time:"",filename:""}
     }
     static fileFields(){
         return ["from","to","info","filename"]
     }
+    // check
     static checked(){
         return {tag:"checked"}
     }
     static check(){
         return {tag:"check"}
     }
+    // signup
     static signup(){
         return {tag:"signup",username:"",password:""}
     }
@@ -53,6 +61,7 @@ class protocal{
     static signupFail(){
         return {tag:"signupFail"}
     }
+    // attendance
     static attendance(){
         return {tag:"attendance"}
     }

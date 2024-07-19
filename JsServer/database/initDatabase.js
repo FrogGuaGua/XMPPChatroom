@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-
+// This js file is to reset the database
 const dbPath = path.resolve(__dirname, 'database.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -10,6 +10,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.log('Connected to the database.');
     }
 });
+// create Tables
 db.serialize(() => {
     db.run(
         `CREATE TABLE users (

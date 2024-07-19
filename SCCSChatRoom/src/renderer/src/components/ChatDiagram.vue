@@ -49,7 +49,7 @@ const onSend = () => {
     info.from = myInfomation.jid
     info.to = statePool.currentPage.jid
     info.type = "info"
-    let slicedInfo = sliceStr(userInput.value,190)
+    let slicedInfo = sliceStr(userInput.value, 190)
     if (info.to != "public") {
         let publickey = null
         myInfomation.presence.forEach(user => {
@@ -70,9 +70,15 @@ const onSend = () => {
                 }
             })
         })
+        info.info = btoa(info.info)
+    } else {
+        info.info = userInput.value
     }
-    info.info = btoa(info.info)
     myInfomation.websocket.send(JSON.stringify(info))
+    if (info.to != "public" && info.to != myInfomation.jid) {
+        info.info = userInput.value
+        myInfomation.chatlog.push(info)
+    }
     userInput.value = ""
 }
 const onSendFile = () => {
@@ -99,6 +105,9 @@ const selectFile = async (event) => {
         info.to = statePool.currentPage.jid
         info.filename = file.name
         info.info = new TextDecoder('utf-8').decode(new Uint8Array(e.target.result).buffer);
+        if (info.to != "public" && info.to != myInfomation.jid) {
+            myInfomation.chatlog.push(info)
+        }
         let publickey = null
         myInfomation.presence.forEach(user => {
             if (user.jid == statePool.currentPage.jid) {
@@ -110,17 +119,17 @@ const selectFile = async (event) => {
         } else {
             publickey = pki.publicKeyFromPem(publickey)
         }
-        let slicedInfo = sliceStr(info.info,190)
+        let slicedInfo = sliceStr(info.info, 190)
         let currentByte = ""
-        slicedInfo.forEach((str)=>{
+        slicedInfo.forEach((str) => {
             currentByte += publickey.encrypt(str, 'RSA-OAEP', {
-            md: md.sha256.create(),
-            mgf1: {
-                md: md.sha1.create()
-            }
+                md: md.sha256.create(),
+                mgf1: {
+                    md: md.sha1.create()
+                }
+            })
         })
-        })
-        info.info=btoa(currentByte)
+        info.info = btoa(currentByte)
         myInfomation.websocket.send(JSON.stringify(info))
     }
     filereader.readAsArrayBuffer(file)

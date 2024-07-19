@@ -1,4 +1,6 @@
 const forge = require('node-forge');
+
+// class for generate rsa2048 public key and private key
 class RSAOAEP2048 {
     constructor() {
         this.RSA = forge.pki.rsa;
@@ -6,13 +8,13 @@ class RSAOAEP2048 {
         this.publicKeyPem = forge.pki.publicKeyToPem(this.publicKey)
         this.privateKeyPem = forge.pki.privateKeyToPem(this.privateKey)
     }
-
+    // generate key pair for rsa
     generateKeyPair() {
         this.RSAHandle = this.RSA.generateKeyPair({ bits: 2048, e: 0x10001 });
         this.publicKey = this.RSAHandle.publicKey;
         this.privateKey = this.RSAHandle.privateKey;
     }
-
+    // function to encrypte data
     encrypt(data) {
         return this.publicKey.encrypt(data, 'RSA-OAEP', {
             md: forge.md.sha1.create(),
@@ -21,6 +23,7 @@ class RSAOAEP2048 {
             }
         });
     }
+    // function to decrypte data
     decrypt(data) {
         return this.privateKey.decrypt(data, 'RSA-OAEP', {
             md: forge.md.sha1.create(),
@@ -31,6 +34,7 @@ class RSAOAEP2048 {
     }
 
 }
+// function to check json file
 function fieldCheck(fields, json) {
     for (const field of fields) {
         if (!(field in json) || typeof json[field] !== 'string' || json[field].trim() === '') {

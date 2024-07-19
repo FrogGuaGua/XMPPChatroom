@@ -3,7 +3,7 @@ class protocal {
         return { tag: "login", username: "", password: "",nickname:"",publickey:""}
     }
     static message() {
-        return { tag: "message", from: "", to: "", type: "", info: "" }
+        return { tag: "message", from: "", to: "", info: "" }
     }
     static file() {
         return { tag: "file", filename:"", from: "", to: "", info: "" }

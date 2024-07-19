@@ -1,5 +1,0 @@
-CREATE TABLE users (
-    uid INTEGER PRIMARY KEY AUTOINCREMENT,
-    jid TEXT NOT NULL UNIQUE,,
-    passwordhash TEXT NOT NULL
-);

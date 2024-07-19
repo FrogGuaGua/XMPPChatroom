@@ -2,12 +2,13 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const { userInfo } = require('../util/protocol');
 
-
+// database class
 class DatabaseManagement {
     constructor() {
         this.database = null
         this.load()
     }
+    // load the database
     load() {
         let dbpath = path.resolve(__dirname, 'database.db');
         this.database = new sqlite3.Database(dbpath, (error) => {
@@ -16,6 +17,7 @@ class DatabaseManagement {
             }
         })
     }
+    // handle for run sql
     async execute(sql, params = []) {
         return new Promise((resolve, reject) => {
             this.database.get(sql, params, (err, row) => {
@@ -27,6 +29,7 @@ class DatabaseManagement {
             });
         });
     }
+    // Use to query user's password by jid
     async queryUser(jid){
         let sql =  "SELECT jid,passwordhash FROM users WHERE jid = ?";
         try{
@@ -37,6 +40,7 @@ class DatabaseManagement {
             return false
         }
     }
+    // Use to apply user's password and jid
     async registerUser(jid, password) {
         let sql = "INSERT INTO users (jid, passwordhash) VALUES (?, ?)";
         try {

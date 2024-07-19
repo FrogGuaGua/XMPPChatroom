@@ -5,10 +5,10 @@ const protocal = require('../util/protocol');
 const { parseJID } = require('../util/jid');
 const { fieldCheck } = require('../util/security');
 
-
+// Server class
 class Server {
     constructor(domain, ip, port, appHandle) {
-        this.domain = domain
+        this.domain = domain 
         this.ip = ip
         this.port = port
         this.activeSocket = null
@@ -18,6 +18,7 @@ class Server {
         this.presenceInfo = null
         this.appHandle = appHandle
     }
+    // connect the remote serer
     async activeConnect() {
         if (this.reconnectTimeout) {
             clearTimeout(this.reconnectTimeout);
@@ -33,6 +34,7 @@ class Server {
             this.activeSocket.onerror = this.error.bind(this)
         }
     }
+    // handle reconnect condition
     reconnect() {
         if (this.reconnectTimeout) return;
         this.reconnectTimeout = setTimeout(() => {
@@ -44,6 +46,7 @@ class Server {
         console.error("Remote server is not online")
         this.reconnect()
     }
+    // handle attendance
     attendance(event) {
         console.log("Server connected")
         this.send(JSON.stringify(protocal.attendance()))
@@ -52,20 +55,23 @@ class Server {
         presence = JSON.stringify(presence)
         this.send(presence)
     }
+    // handle close
     close(websocket) {
         console.log("Serverservice closed")
         this.reconnect()
         this.appHandle.boardcastTotalPresence()
     }
+    // handle message receive
     process(event) {
         console.log('WebSocket message received:', event.data);
         let info = null
         try {
             info = JSON.parse(event.data)
         } catch (error) {
+            console.log(event.data)
             console.error("JSON error in server to server");
         }
-        if (!info.tag) {
+        if (info == null) {
             return
         }
         if (info.tag == "presence") {
@@ -183,7 +189,7 @@ class ServerService {
                     }
                     if (message.try) {
                         try {
-                            let a = BigInt(`0x${message.try}`)
+                            let a = BigInt('0x'+message.try)
                             let b = BigInt("0xb6d733a404d0b06e51dcf52fec53b6b9ed807b3bdc13dbe33e5e59182f66b733")
                             let c = BigInt("0x3e9")
                             let d = "4384742de6012452302030a8c48605374070da2f41d5847b066bcd94f32a05e0"
@@ -219,21 +225,10 @@ class ServerService {
         })
     }
     async file(message, socket) {
-        let to = parseJID(message.to)
-        if (this.domain == to.domain) {
-            this.appHandle.taskQueue.enqueue(message)
-        } else {
-            socket.close()
-        }
+        this.appHandle.taskQueue.enqueue(message)
     }
     async message(message, socket) {
-        let to = parseJID(message.to)
-        if (this.domain == to.domain) {
-            this.appHandle.taskQueue.enqueue(message)
-        } else {
-            socket.close()
-        }
-
+        this.appHandle.taskQueue.enqueue(message)
     }
     async check(message, socket) {
         socket.send(JSON.stringify(protocal.checked()))
@@ -254,7 +249,6 @@ class ServerService {
     }
     load() {
         this.defaultPort = this.appHandle.defaultServerPort
-        this.domain = this.appHandle.defaultDomain
         this.appHandle.remoteServers.forEach(server => {
             try {
                 if (server.domain && server.address) {
