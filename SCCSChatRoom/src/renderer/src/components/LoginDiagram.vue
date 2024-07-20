@@ -144,7 +144,7 @@ const onSubmit = () => {
   }
 }
 const onSign = () => {
-  if (username.value.length < 1 || password.value.length) {
+  if (username.value.length < 1 || password.value.length < 8 ) {
     ElMessage({
       message: 'The length of password are at least 8 or empty username.',
       type: 'warning'
