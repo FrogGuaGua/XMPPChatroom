@@ -118,7 +118,12 @@ const onSubmit = () => {
     websocket.send(JSON.stringify(loginInfo))
   }
   websocket.onclose = () => {
-    statePool.state = 0
+    if(statePool.state == 2){
+      onSubmit()
+    }
+    else{
+      statePool.state = 0
+    }
   }
   websocket.onmessage = (event) => {
     let message = JSON.parse(event.data)
@@ -193,7 +198,6 @@ watch(
         stack.value += 1
         if(stack.value == 3){
           websocket.close()
-          onSubmit()
         }
       }, 2000)
       websocket.onmessage = (event) => {
