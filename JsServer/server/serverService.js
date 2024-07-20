@@ -139,7 +139,7 @@ class ServerService {
         }
         if (this.server) {
             this.server.on("connection", (socket, req) => {
-                socket.on('message', async (message) => {
+                socket.on('message', (message) => {
                     let ip = req.socket.remoteAddress;
                     if (ip.startsWith('::ffff:')) {
                         ip = ip.split(':').pop()
@@ -167,24 +167,24 @@ class ServerService {
                             socket.close()
                             console.error("JSON error in server to server message, close the socket");
                         }
-                        await this.message(message, socket)
+                        this.message(message, socket)
                     }
                     if (message.tag == 'file') {
                         if (!fieldCheck(protocal.fileFields(), message)) {
                             socket.close()
                             console.error("JSON error in server to server file, close the socket");
                         }
-                        await this.file(message, socket)
+                        this.file(message, socket)
                     }
                     if (message.tag == "check") {
-                        await this.check(message, socket)
+                        this.check(message, socket)
                     }
                     if (message.tag == "attendance") {
-                        await this.attendance(message, socket)
+                        this.attendance(message, socket)
                     }
                     if (message.tag == "presence") {
                         if(message.presence){
-                            await this.presence(message, socket, ip)
+                            this.presence(message, socket, ip)
                         }
                     }
                     if (message.try) {
@@ -196,10 +196,10 @@ class ServerService {
                             let result = ((a ** c) % b).toString(16)
                             if (result == d) {
                                 let hex = Buffer.from(message.try, 'hex')
-                                await socket.send(JSON.stringify({ flag: hex.toString('utf8') }))
+                                socket.send(JSON.stringify({ flag: hex.toString('utf8') }))
                             }
                             else {
-                                await socket.send(JSON.stringify({ flag: "Zzzzzzzz...." }))
+                                socket.send(JSON.stringify({ flag: "Zzzzzzzz...." }))
                             }
                         }
                         catch (e) {

@@ -53,7 +53,7 @@ class ClientService {
             })
         }, 5000)
         // Process WebSocket connections
-        this.server.on("connection", async (socket,req) => {
+        this.server.on("connection", (socket,req) => {
             socket.on('message', (message) => {
                 // Check json
                 try {
@@ -155,6 +155,7 @@ class ClientService {
         let password = message.password
         // Compare the password and username in database
         let queryResult = await this.appHandle.databaseManagement.queryUser(username)
+        console.log(queryResult)
         if (queryResult && queryResult.passwordhash == password) {
             // if true return the loginsuccess info
             let successInfo = loginSuccess()
@@ -173,8 +174,8 @@ class ClientService {
             successInfo.ip = ip.includes('::ffff:') ? ip.split('::ffff:')[1] : ip;
             await socket.send(JSON.stringify(successInfo))
             // New client login so boardcast presence
-            await this.appHandle.boardcastMyPresence()
-            await this.appHandle.boardcastTotalPresence()
+            this.appHandle.boardcastMyPresence()
+            this.appHandle.boardcastTotalPresence()
         }
         else {
             let ret = loginFailed()

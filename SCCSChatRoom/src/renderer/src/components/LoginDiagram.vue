@@ -144,9 +144,9 @@ const onSubmit = () => {
   }
 }
 const onSign = () => {
-  if (username.value.length < 8) {
+  if (username.value.length < 1 || password.value.length) {
     ElMessage({
-      message: 'The length of username are at least 8.',
+      message: 'The length of username,password are at least 8.',
       type: 'warning'
     })
     return
@@ -203,16 +203,22 @@ watch(
           myInfomation.presence = message.presence
         }
         if (message.tag == 'message' || message.tag == 'file') {
-          if (message.to != 'public') {
-            let slicedInfo = sliceStr(atob(message.info),256)
-            let currentinfo = ""
-            slicedInfo.forEach(str=>{
-              currentinfo += myInfomation.security.decrypt(str)
-            })
-            message.info = currentinfo 
+          try {
+            if (message.to != 'public') {
+              let slicedInfo = sliceStr(atob(message.info), 256)
+              let currentinfo = ""
+              slicedInfo.forEach(str => {
+                currentinfo += myInfomation.security.decrypt(str)
+              })
+              message.info = currentinfo
+            }
+            myInfomation.chatlog.push(message)
           }
-          myInfomation.chatlog.push(message)
+          catch (e) {
+            console.log(e)
+          }
         }
+
       }
     } else {
       if (state == 0) {

@@ -31,5 +31,5 @@
     ],
     "defaultServerPort": "5555",
     "defaultClientPort": "4567",
-    "defaultDomainName":"s1"
+    "defaultDomainName":"s0"
 }
