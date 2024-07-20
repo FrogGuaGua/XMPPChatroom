@@ -97,6 +97,10 @@ class ClientService {
                 }
                 // Process check tag
                 if (message.tag == "check") {
+                    let client = this.getClientBySocket(socket)[0]
+                    if(client.stack){
+                        client.stack = 0
+                    }
                     this.check(message, socket)
                 }
 
@@ -152,7 +156,6 @@ class ClientService {
         let password = message.password
         // Compare the password and username in database
         let queryResult = await this.appHandle.databaseManagement.queryUser(username)
-        console.log(queryResult)
         if (queryResult && queryResult.passwordhash == password) {
             // if true return the loginsuccess info
             let successInfo = loginSuccess()

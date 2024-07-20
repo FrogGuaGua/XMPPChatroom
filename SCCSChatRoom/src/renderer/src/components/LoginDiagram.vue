@@ -118,12 +118,7 @@ const onSubmit = () => {
     websocket.send(JSON.stringify(loginInfo))
   }
   websocket.onclose = () => {
-    if(statePool.state == 2){
-      onSubmit()
-    }
-    else{
-      statePool.state = 0
-    }
+    statePool.state = 0
   }
   websocket.onmessage = (event) => {
     let message = JSON.parse(event.data)
@@ -142,7 +137,7 @@ const onSubmit = () => {
   }
 }
 const onSign = () => {
-  if (username.value.length < 1 || password.value.length < 8 ) {
+  if (username.value.length < 1 || password.value.length < 8) {
     ElMessage({
       message: 'The length of password are at least 8 or empty username.',
       type: 'warning'
@@ -196,8 +191,16 @@ watch(
       heart.value = setInterval(() => {
         websocket.send(JSON.stringify(protocal.check()))
         stack.value += 1
-        if(stack.value == 3){
+        if (stack.value == 3) {
+          ElMessage({
+            message: 'You lose the connection.',
+            type: 'warning'
+          })
+          stack.value = 0
           websocket.close()
+          clearInterval(heart.value)
+          heart.value = ''
+          onSubmit()
         }
       }, 2000)
       websocket.onmessage = (event) => {
@@ -205,7 +208,7 @@ watch(
         if (message.tag == 'presence') {
           myInfomation.presence = message.presence
         }
-        if (message.tag == 'checked'){
+        if (message.tag == 'checked') {
           stack.value = 0
         }
         if (message.tag == 'message' || message.tag == 'file') {
