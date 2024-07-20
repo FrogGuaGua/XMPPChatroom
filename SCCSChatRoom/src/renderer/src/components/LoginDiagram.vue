@@ -92,13 +92,6 @@ const parseIP = (value) => {
   return validParts.join('.');
 };
 const onSubmit = () => {
-  if (username.value.length < 8) {
-    ElMessage({
-      message: 'The length of username are at least 8.',
-      type: 'warning'
-    })
-    return
-  }
   if (!username.value || !password.value || !nickname.value || username.value == "public") {
     ElMessage({
       message: 'Login failed, check address port username password.',
