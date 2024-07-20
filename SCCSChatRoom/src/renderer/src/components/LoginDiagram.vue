@@ -182,6 +182,7 @@ const onSign = () => {
   }
 }
 const heart = ref('')
+const stack = ref(0)
 watch(
   () => statePool.state,
   (state) => {
@@ -189,7 +190,12 @@ watch(
       statePool.isLogin = true
       heart.value = setInterval(() => {
         websocket.send(JSON.stringify(protocal.check()))
-      }, 5000)
+        stack += 1
+        if(stack == 3){
+          websocket.close()
+          onSubmit()
+        }
+      }, 2000)
       websocket.onmessage = (event) => {
         let message = JSON.parse(event.data)
         if (message.tag == 'presence') {
@@ -222,6 +228,7 @@ watch(
       }
       if (heart.value) {
         clearInterval(heart.value)
+        stack = 0
       }
     }
   }
