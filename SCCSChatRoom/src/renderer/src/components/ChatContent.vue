@@ -30,7 +30,7 @@ const getCurrentChat = () => {
     }
     else {
         let currentChat = myInfomation.chatlog.filter(messages => {
-            return messages.from === statePool.currentPage.jid || messages.to === statePool.currentPage.jid
+            return (messages.from === statePool.currentPage.jid || messages.to === statePool.currentPage.jid) && messages.to!=="public"
         })
         return currentChat
     }
