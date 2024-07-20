@@ -31,7 +31,7 @@ const prop = defineProps({
     filename: String,
     time: String,
 })
-// Implementing for peer to peer down load
+// Implementing for peer to peer download
 const download = () => {
     if (prop.tag == 'file') {
         const blob = new Blob([prop.info]);

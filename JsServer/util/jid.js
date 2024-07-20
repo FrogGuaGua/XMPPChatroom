@@ -1,3 +1,8 @@
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
+
+
+
 // Code to parse JID
 // c1@s1 to [c1,s1]
 function parseJID(jid){
@@ -17,4 +22,5 @@ function parseJID(jid){
       return false; 
     }
 }
+
 module.exports = {parseJID};

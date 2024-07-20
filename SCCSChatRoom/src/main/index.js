@@ -1,3 +1,6 @@
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
+// This is the electron defaut 
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -78,7 +81,9 @@ app.on('window-all-closed', () => {
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-
+// Real p2p
+// Nerver used
+// Cuz it is peer to peer not point to pint
 class P2PPort {
   constructor() {
       this.port = null;

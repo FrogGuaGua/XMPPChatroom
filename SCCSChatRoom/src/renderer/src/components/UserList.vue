@@ -4,8 +4,11 @@
 </template>
 
 <script setup>
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
 import { defineProps } from 'vue';
 import UserCard from "@/components/UserCard.vue";
+// Genertate user card in userlist
 const userList = defineProps({
   userList: {
     nickname:"",

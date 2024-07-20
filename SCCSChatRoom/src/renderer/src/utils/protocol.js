@@ -1,3 +1,9 @@
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
+
+// all protocal 
+// including the field check 
+// something is nerver used
 class protocal {
     static login() {
         return { tag: "login", username: "", password: "",nickname:"",publickey:""}

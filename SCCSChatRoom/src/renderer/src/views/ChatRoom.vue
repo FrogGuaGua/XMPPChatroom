@@ -18,6 +18,8 @@
 </template>
 
 <script setup>
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
 import UserList from '@/components/UserList.vue'
 import PublicRoom from '@/components/PublicRoom.vue'
 import ChatDiagram from '@/components/ChatDiagram.vue'

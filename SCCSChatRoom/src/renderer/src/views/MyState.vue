@@ -6,6 +6,8 @@
   </el-descriptions>
 </template>
 <script setup>
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
 import { inject } from 'vue'
 // Display user info
 const myInfomation = inject('myInfomation')

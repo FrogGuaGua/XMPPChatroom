@@ -8,13 +8,15 @@
 <script setup>
 import { inject, ref } from 'vue';
 import ChatMessage from "@/components/ChatMessage.vue"
-
+// control the diagram size
 const pageHeight = ref(document.documentElement.clientHeight)
 const userListHeight = () => {
     return "height: " + pageHeight.value * 0.51 + "px"
 }
+// inject global var
 const myInfomation = inject("myInfomation")
 const statePool = inject("statePool")
+// message display logic
 const getCurrentChat = () => {
     if (statePool.currentPage.jid == "public") {
         let currentChat = myInfomation.chatlog.filter(messages => {

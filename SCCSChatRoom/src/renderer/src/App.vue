@@ -21,6 +21,8 @@
 </template>
 
 <script setup>
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
 import UserLogin from './views/UserLogin.vue'
 import ChatRoom from './views/ChatRoom.vue'
 import MyState from './views/MyState.vue'

@@ -37,10 +37,12 @@ import { protocal } from '@/utils/protocol';
 import { md, pki } from "node-forge";
 import { ElMessageBox } from 'element-plus'
 import { sliceStr } from '../utils/security';
+// inject global var
 const myInfomation = inject('myInfomation');
 const statePool = inject('statePool')
 const userInput = ref("")
 const fileInputer = ref()
+// Code for send message function
 const onSend = () => {
     if (userInput.value == "") {
         return
@@ -81,10 +83,13 @@ const onSend = () => {
     }
     userInput.value = ""
 }
+// Fix bug for click send file
 const onSendFile = () => {
     fileInputer.value.dispatchEvent(new PointerEvent("click"))
 }
+// Code for p2p function
 const selectFile = async (event) => {
+    // size limitation
     if (event.target.files[0].size >= 10240) {
         ElMessageBox.alert('File size>10 kb is not allowed', 'P2P policy', {
             confirmButtonText: 'OK',
@@ -99,6 +104,7 @@ const selectFile = async (event) => {
     }
     let file = event.target.files[0]
     const filereader = new FileReader()
+    // load the file
     filereader.onload = (e) => {
         let info = protocal.file()
         info.from = myInfomation.jid

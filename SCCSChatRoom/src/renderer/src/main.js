@@ -1,3 +1,5 @@
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
 import { createApp } from 'vue'
 import App from './App.vue'
 import ElementPlus from 'element-plus'

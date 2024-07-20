@@ -71,16 +71,17 @@ import CryptoJS from 'crypto-js'
 import { ElMessage } from 'element-plus'
 import { inject, ref, watch } from 'vue'
 import { sliceStr } from '../utils/security'
-
-const username = ref('12312312')
-const password = ref('123')
-const nickname = ref('12312312')
-const serverIP = ref('10.13.84.131')
+// Ref for each input
+const username = ref('')
+const password = ref('')
+const nickname = ref('')
+const serverIP = ref('')
 const serverPort = ref('4567')
 const statePool = inject('statePool')
 const myInfomation = inject('myInfomation')
 var security = null
 var websocket = null
+// Limited IP import
 const parseIP = (value) => {
   const parts = value.split('.');
   const validParts = parts.map(part => {
@@ -91,7 +92,9 @@ const parseIP = (value) => {
   });
   return validParts.join('.');
 };
+// Code for login function
 const onSubmit = () => {
+  // check invalid input
   if (!username.value || !password.value || !nickname.value || username.value == "public") {
     ElMessage({
       message: 'Login failed, check address port username password.',
@@ -105,6 +108,7 @@ const onSubmit = () => {
   websocket = new WebSocket('ws://' + statePool.serverIP + ':' + statePool.serverPort)
   myInfomation.security = security
   myInfomation.websocket = websocket
+  // send username and password
   websocket.onopen = () => {
     ElMessage({
       message: 'Connected to server, start login.',
@@ -117,9 +121,13 @@ const onSubmit = () => {
     loginInfo.publickey = security.publicKeyPem
     websocket.send(JSON.stringify(loginInfo))
   }
+  // if websocket close back to login diagram
   websocket.onclose = () => {
     statePool.state = 0
   }
+  // receive the message for server
+  // if success show chatroom
+  // else show failed message
   websocket.onmessage = (event) => {
     let message = JSON.parse(event.data)
     if (message.tag == 'loginSuccess') {
@@ -136,7 +144,9 @@ const onSubmit = () => {
     }
   }
 }
+// Code for sign function
 const onSign = () => {
+  // password and username limitation
   if (username.value.length < 1 || password.value.length < 8) {
     ElMessage({
       message: 'The length of password are at least 8 or empty username.',
@@ -144,6 +154,7 @@ const onSign = () => {
     })
     return
   }
+  // not empty
   if (!username.value || !password.value || username.value == "public") {
     ElMessage({
       message: 'Signup failed, check address port username password.',
@@ -157,6 +168,7 @@ const onSign = () => {
   websocket = new WebSocket('ws://' + statePool.serverIP + ':' + statePool.serverPort)
   myInfomation.security = security
   myInfomation.websocket = websocket
+  // send sign up info 
   websocket.onopen = () => {
     ElMessage({
       message: 'Connected to server, start signup.',
@@ -167,6 +179,7 @@ const onSign = () => {
     loginInfo.password = CryptoJS.MD5(password.value).toString()
     websocket.send(JSON.stringify(loginInfo))
   }
+  // process signupSuccess and signupfailed
   websocket.onmessage = (event) => {
     let message = JSON.parse(event.data)
     if (message.tag == 'signupSuccess') {
@@ -181,13 +194,17 @@ const onSign = () => {
     }
   }
 }
+// heart beat ref
 const heart = ref('')
 const stack = ref(0)
+// watch the statePool.state change
 watch(
   () => statePool.state,
   (state) => {
+    // if change to chat
     if (state == 2) {
       statePool.isLogin = true
+      // process the heart beat
       heart.value = setInterval(() => {
         websocket.send(JSON.stringify(protocal.check()))
         stack.value += 1
@@ -203,14 +220,23 @@ watch(
           onSubmit()
         }
       }, 2000)
+      // Process message receive
       websocket.onmessage = (event) => {
-        let message = JSON.parse(event.data)
+        let message = event.data
+        try { message = JSON.parse(event.data) } 
+        catch (e) {
+          console.log("Json error")
+          return
+        }
+        // Process presence
         if (message.tag == 'presence') {
           myInfomation.presence = message.presence
         }
+        // Process checked
         if (message.tag == 'checked') {
           stack.value = 0
         }
+        // Process message or file
         if (message.tag == 'message' || message.tag == 'file') {
           try {
             if (message.to != 'public') {
@@ -230,6 +256,7 @@ watch(
 
       }
     } else {
+      // some error process
       if (state == 0) {
         ElMessage.error({
           message: 'Connect closed.'

@@ -1,3 +1,6 @@
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
+
 const forge = require('node-forge');
 
 // class for generate rsa2048 public key and private key
@@ -43,4 +46,19 @@ function fieldCheck(fields, json) {
     }
     return true
 }
-module.exports = { RSAOAEP2048, fieldCheck };
+// copy the data to object
+function copy(data, json) {
+    try {
+        for (let key in json) {
+            if (key in json && key in data) {
+                copy(data[key], json[key])
+            } else {
+                data[key] = json[key]
+            }
+        }
+    } catch (e) {
+        console.log("copy error")
+        return false
+    }
+}
+module.exports = { RSAOAEP2048, fieldCheck, copy };

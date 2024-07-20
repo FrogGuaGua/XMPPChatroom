@@ -1,4 +1,6 @@
-const { format } = require("node-forge/lib/util");
+// Group 1
+// Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
+
 const { parseJID } = require("../util/jid");
 
 
