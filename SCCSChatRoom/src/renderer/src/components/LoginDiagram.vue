@@ -190,8 +190,8 @@ watch(
       statePool.isLogin = true
       heart.value = setInterval(() => {
         websocket.send(JSON.stringify(protocal.check()))
-        stack += 1
-        if(stack == 3){
+        stack.value += 1
+        if(stack.value == 3){
           websocket.close()
           onSubmit()
         }
@@ -200,6 +200,9 @@ watch(
         let message = JSON.parse(event.data)
         if (message.tag == 'presence') {
           myInfomation.presence = message.presence
+        }
+        if (message.tag == 'checked'){
+          stack.value = 0
         }
         if (message.tag == 'message' || message.tag == 'file') {
           try {
@@ -228,7 +231,7 @@ watch(
       }
       if (heart.value) {
         clearInterval(heart.value)
-        stack = 0
+        stack.value = 0
       }
     }
   }

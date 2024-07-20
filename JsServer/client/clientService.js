@@ -126,10 +126,7 @@ class ClientService {
     }
     // Handle user check 
     check(message, socket) {
-        let client = this.getClientBySocket(socket)[0]
-        if(client){
-            client.stack = 0
-        }
+        socket.send(JSON.stringify(protocal.checked()))
     }
     // Handle user file
     file(message, socket){
