@@ -17,7 +17,7 @@
                 </el-col>
                 <el-col :span="2">
                     <el-button type="primary" @click="onSendFile()">
-                        <input ref="fileInputer"  type="file" @change="selectFile"
+                        <input ref="fileInputer" type="file" @change="selectFile"
                             style="opacity: 0; width: 100%; height: 100%; position: absolute;pointer-events: none;">
                         <el-icon>
                             <Upload />
@@ -66,7 +66,11 @@ const onSend = () => {
             myInfomation.chatlog.push(info)
             return
         } else {
-            publickey = pki.publicKeyFromPem(publickey)
+            try { publickey = pki.publicKeyFromPem(publickey) }
+            catch (e) {
+                console.log("error public key stop sending")
+                return
+            }
         }
         slicedInfo.forEach((str) => {
             info.info += publickey.encrypt(str, 'RSA-OAEP', {
@@ -129,7 +133,11 @@ const selectFile = async (event) => {
             myInfomation.websocket.send(JSON.stringify(btoa(info)))
             return
         } else {
-            publickey = pki.publicKeyFromPem(publickey)
+            try { publickey = pki.publicKeyFromPem(publickey) }
+            catch (e) {
+                console.log("error public key stop sending")
+                return
+            }
         }
         let slicedInfo = sliceStr(info.info, 190)
         let currentByte = ""
@@ -143,9 +151,9 @@ const selectFile = async (event) => {
         })
         info.info = btoa(currentByte)
         myInfomation.websocket.send(JSON.stringify(info))
-        fileInputer.value.value= ""
+        fileInputer.value.value = ""
     }
-    filereader.onerror=()=>{
+    filereader.onerror = () => {
         console.log("File transfer finished.")
     }
     filereader.readAsArrayBuffer(file)
