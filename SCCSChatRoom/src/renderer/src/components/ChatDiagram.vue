@@ -59,7 +59,10 @@ const onSend = () => {
                 publickey = user.publickey
             }
         });
-        if (!publickey) {
+        if (publickey == null || publickey == '') {
+            info.info = userInput.value
+            myInfomation.websocket.send(JSON.stringify(info))
+            myInfomation.chatlog.push(info)
             return
         } else {
             publickey = pki.publicKeyFromPem(publickey)
@@ -120,7 +123,8 @@ const selectFile = async (event) => {
                 publickey = user.publickey
             }
         });
-        if (!publickey) {
+        if (publickey == null || publickey == '') {
+            myInfomation.websocket.send(JSON.stringify(info))
             return
         } else {
             publickey = pki.publicKeyFromPem(publickey)
