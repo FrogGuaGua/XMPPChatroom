@@ -1,15 +1,8 @@
-# Group 1
-# Zhihao Cheng / Shahzeb / Sabrina Afrine Sathi / Zhisong Chen
-
 {
     "server": [
         {
             "domain": "s6",
             "address":"10.13.83.155"
-        },
-        {
-            "domain": "s2",
-            "address":"10.13.89.245"
         }
 
     ],
