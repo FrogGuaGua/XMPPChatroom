@@ -250,7 +250,7 @@ watch(
             myInfomation.chatlog.push(message)
           }
           catch (e) {
-            console.log(e)
+            console.log("Receive the message without encrytion.")
           }
         }
 
