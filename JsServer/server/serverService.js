@@ -69,6 +69,7 @@ class Server {
     // Handle close event
     close(websocket) {
         console.log("Serverservice closed")
+        this.presenceInfo = null
         this.reconnect()
         this.appHandle.boardcastTotalPresence()
     }
@@ -178,6 +179,7 @@ class ServerService {
                     })
                     if (flag) {
                         socket.close()
+                        console.log(ip)
                         console.log("Wrong ip conncected in, kick out")
                     }
                     let info = {}

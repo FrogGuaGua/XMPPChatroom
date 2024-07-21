@@ -1,9 +1,19 @@
 {
     "server": [
         {
+            "domain": "s4",
+            "address":"10.13.101.145"
+        },
+        {
             "domain": "s2",
             "address":"10.13.89.245"
+        },
+        
+        {
+            "domain": "s6",
+            "address":"10.13.69.152"
         }
+        
 
     ],
     "defaultServerPort": "5555",

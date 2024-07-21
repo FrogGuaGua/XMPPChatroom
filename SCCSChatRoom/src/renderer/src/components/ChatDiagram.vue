@@ -17,7 +17,7 @@
                 </el-col>
                 <el-col :span="2">
                     <el-button type="primary" @click="onSendFile()">
-                        <input ref="fileInputer" type="file" @change="selectFile"
+                        <input ref="fileInputer"  type="file" @change="selectFile"
                             style="opacity: 0; width: 100%; height: 100%; position: absolute;pointer-events: none;">
                         <el-icon>
                             <Upload />
@@ -60,6 +60,7 @@ const onSend = () => {
             }
         });
         if (publickey == null || publickey == '') {
+            console.log("The user do not have public key.")
             info.info = userInput.value
             myInfomation.websocket.send(JSON.stringify(info))
             myInfomation.chatlog.push(info)
@@ -90,6 +91,7 @@ const onSend = () => {
 const onSendFile = () => {
     fileInputer.value.dispatchEvent(new PointerEvent("click"))
 }
+const filereader = new FileReader()
 // Code for p2p function
 const selectFile = async (event) => {
     // size limitation
@@ -106,7 +108,6 @@ const selectFile = async (event) => {
         return
     }
     let file = event.target.files[0]
-    const filereader = new FileReader()
     // load the file
     filereader.onload = (e) => {
         let info = protocal.file()
@@ -124,7 +125,8 @@ const selectFile = async (event) => {
             }
         });
         if (publickey == null || publickey == '') {
-            myInfomation.websocket.send(JSON.stringify(info))
+            console.log("The user do not have public key,try to send.")
+            myInfomation.websocket.send(JSON.stringify(btoa(info)))
             return
         } else {
             publickey = pki.publicKeyFromPem(publickey)
@@ -141,6 +143,10 @@ const selectFile = async (event) => {
         })
         info.info = btoa(currentByte)
         myInfomation.websocket.send(JSON.stringify(info))
+        fileInputer.value.value= ""
+    }
+    filereader.onerror=()=>{
+        console.log("File transfer finished.")
     }
     filereader.readAsArrayBuffer(file)
 }
