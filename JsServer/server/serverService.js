@@ -7,7 +7,7 @@ const fs = require('fs');
 const WebSocket = require("ws");
 const protocal = require('../util/protocol');
 const { parseJID } = require('../util/jid');
-const { fieldCheck } = require('../util/security');
+const { fieldCheck, copy } = require("../util/security");
 
 // Server class
 // The class will inited by config
